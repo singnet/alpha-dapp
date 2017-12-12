@@ -106,8 +106,8 @@ const styles = {
   uploadedFile: {
     display: "flex",
     border: "dashed 1px #bbb",
-    padding: 60, margin: 10,
-    flex: 1, alignItems: "center", flexDirection: "column"
+    padding: 60, margin: 30,
+    alignItems: "center", flexDirection: "column"
   },
   error: {
     marginTop: 20,

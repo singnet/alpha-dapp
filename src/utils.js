@@ -69,8 +69,8 @@ export const performJob = (blob, type) =>
         id:1
       }
     })
-      .then(console.log)
-      .catch(console.error)
+      .then(resolve)
+      .catch(reject)
   })
 
 export const normalizeFile = (name, file) =>

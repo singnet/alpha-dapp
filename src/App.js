@@ -71,8 +71,14 @@ class App extends Component {
     })
   }
 
-  deposit() {
-    this.marketContract.deposit(AMOUNT, console.log)
+  deposit = () => {
+    this.marketContract.deposit(AMOUNT, (err,result) => {
+      if (!err && result) {
+        this.handleAnalysis()
+          .then(console.log)
+          .catch(console.log)
+      }
+    })
   }
 
 

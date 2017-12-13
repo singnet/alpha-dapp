@@ -1,4 +1,6 @@
 import React, { Component } from 'react'
+import { Persist } from 'react-persist'
+
 import logo from './assets/logo/logo.svg'
 import DocumentUploader from './DocumentUploader'
 import JSONTree from 'react-json-tree'
@@ -14,7 +16,7 @@ import {
 } from './utils'
 
 
-const AMOUNT = 800000000
+const AMOUNT = 800000
 
 class App extends Component {
 
@@ -29,7 +31,7 @@ class App extends Component {
   componentDidMount() {
     const { account } = this.state
     this.web3 = window.web3
-    this.amount = new this.web3.BigNumber(AMOUNT)
+    this.amount = new window.web3.BigNumber(AMOUNT)
 
     const that = this
     this.accountInterval = setInterval(function () {
@@ -58,50 +60,53 @@ class App extends Component {
 
 
   setFile = ({ name, preview, type }) => {
-    const { account } = this.state
-    const jobDesc = this.web3.fromAscii(preview)
-
-    this.setState({
-      file: { name, payload: preview, type },
-      buttonVisible: true,
-      isLoading: false
+    const jobDesc = this.web3.fromAscii(preview) 
+    const {contractAddress} = this.state
+    this.tokenContract.approve(contractAddress, AMOUNT, (err,allowance) => {
+      this.setState({
+        file: {name, payload:preview, type},
+        buttonVisible:true,
+        jobDesc
+      })
     })
+  }
 
-    /*  createMarketJob(
-       this.web3,
-       {
-         agent: account,
-         token: tokenAddress,
-         jobDesc
-       },
-       (err, result) => {
-         if (err) return
-         this.setState({isLoading:true})
-         const watcher = setInterval(() => this.web3.eth.getTransactionReceipt(result.transactionHash, (err, receipt) => {
-           console.log("Waiting a mined block to include your contract")
-           if (receipt && receipt.contractAddress) {
-             this.setState({
-               file: { name, payload: preview, type },
-               buttonVisible: true,
-               isLoading: false,
-               contractAddress: receipt.contractAddress
-             })
-             window.localStorage.setItem(
-               account, 
-               JSON.stringify({
-                 address:receipt.contractAddress,
-                 file: { name, payload: preview, type }
-               })
-             )
-             console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
-             clearInterval(watcher)
- 
-           }
-         }),
-           1000
-         )
-       }
-     ) */
+  deposit() {
+    this.marketContract.deposit(AMOUNT, console.log)
+  }
+
+
+  newJob = () => {
+    const { account } = this.state
+    const jobDesc = this.web3.fromAscii("ciao")
+
+    createMarketJob(
+      this.web3,
+      {
+        agent: account,
+        token: tokenAddress,
+        jobDesc
+      },
+      (err, result) => {
+        if (err) return
+        this.setState({ isLoading: true })
+        const watcher = setInterval(() => this.web3.eth.getTransactionReceipt(result.transactionHash, (err, receipt) => {
+          console.log("Waiting a mined block to include your contract")
+          if (receipt && receipt.contractAddress) {
+            this.marketContract = this.web3.eth.contract(marketJobAbi).at(receipt.contractAddress)
+            this.setState({ 
+              contractAddress: receipt.contractAddress, 
+              isLoading:false, 
+              jobDesc
+            })
+            console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
+            clearInterval(watcher)
+          }
+        }),
+          1000
+        )
+      }
+    )
   }
 
   directTransfer = () => {
@@ -114,7 +119,7 @@ class App extends Component {
       },
       async (err, result) => {
         if (err) return
-        this.setState({contractAddress:result})
+        this.setState({ contractAddress: result })
         await this.handleAnalysis()
       }
     )
@@ -130,20 +135,32 @@ class App extends Component {
     const blob = await normalizeFile(name, payload)
     try {
       const job = await performJob(blob.payload, type)
-      console.log(job.data.result)
-      this.setState({ result: job.data.result, buttonVisible:false, isLoading: false })
+      this.setState({ 
+        result: job.data.result, 
+        buttonVisible: false, 
+        isLoading: false 
+      })
     } catch (err) {
-      console.log('errr')
-      //console.error(err)
+      console.log('Error on analysis')
       return
     }
   }
 
 
   render() {
-    const { file, web3Injected, result, account, buttonVisible, isLoading, contractAddress } = this.state
+    const {
+      file,
+      result,
+      account,
+      jobDesc,
+      isLoading,
+      web3Injected,
+      buttonVisible,
+      contractAddress
+    } = this.state
+
     if (!web3Injected) return <h1>Unlock Metamask and select the Kovan testnet</h1>
-    const url = "http://kovan.etherscan.io/tx/" + contractAddress
+    const url = "http://kovan.etherscan.io/address/" + contractAddress
     return (
       <div className="App">
         <header className="App-header">
@@ -154,40 +171,89 @@ class App extends Component {
         <h3>
           Your account: {account}
         </h3>
+        {
+          contractAddress &&
+          <p>
+            Job Contract:  <a target="_blank" href={url}> {contractAddress} </a>
+          </p>
+        }
         <hr />
         {
-          buttonVisible &&
+          !contractAddress &&
+          <table className="table table-hover">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Agent Address</th>
+                <th>Service Offering</th>
+                <th>Price per Unit</th>
+                <th>-</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">deadbeef-aaaa-bbbb-cccc-111111111102</th>
+                <td>Marco's Agent</td>
+                <td>Image Analysis</td>
+                <td>800000 COGS per second</td>
+                <td>
+                  <button
+                    className="btn btn-primary"
+                    type="sumbit"
+                    onClick={() => this.newJob()}
+                  >
+                    HIRE
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        }
+        {
+          contractAddress && buttonVisible &&
           <button
             type="sumbit"
-            onClick={() => this.directTransfer()}
+            onClick={() => this.deposit()}
             className="btn btn-primary"
             disabled={false}
           >
-          Pay {AMOUNT} COGS
+            Pay {AMOUNT} COGS
         </button>
         }
-        <DocumentUploader
-          file={file}
-          fetching={false}
-          editable={true}
-          handleUpload={this.setFile}
-          handleRemove={() => this.setState({ file: false })}
-          error={''}
-        />
         {
-          contractAddress && <p>Transaction:  <a target="_blank" href={url}> {contractAddress} </a></p>
+          contractAddress &&
+          <DocumentUploader
+            file={file}
+            fetching={false}
+            editable={true}
+            handleUpload={this.setFile}
+            handleRemove={() => this.setState({ file: false })}
+            error={''}
+          />
+        }
+        {
+          jobDesc && buttonVisible &&
+          <p>
+            Job Descriptor Hash: {jobDesc}
+          </p>
         }
         {
           isLoading &&
           <p>
-            <br />
             Waiting a mined block to include your contract
+            <br />
             <i className="fa fa-circle-o-notch fa-spin fa-5x"></i>
           </p>
         }
         {
           result && <JSONTree data={result[0]} />
         }
+        <Persist
+          name="alpha"
+          data={this.state}
+          debounce={300}
+          onMount={data => this.setState(data)}
+        />
       </div>
     );
   }

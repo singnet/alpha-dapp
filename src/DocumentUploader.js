@@ -62,8 +62,8 @@ export default class DocumentUploader extends Component {
         <div className="dz-message needsclick">
           <img src={icon} className="upload-img" alt="uploaded" />
           <p>
-            Drag and drop your file or <span className="blue">browse</span> from your computer<br />
-            PNG, PDF, JPG
+            Drag and drop your JPG image 
+            or <span className="blue">browse</span> from your file system 
             </p>
         </div>
       </Dropzone>

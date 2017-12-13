@@ -40,7 +40,7 @@ export function createMarketJob(web3, params, callback) {
     {
       from: agent,
       data: marketJobBytecode,
-      gas: 500000
+      gas: 1200000
     },
     callback
   )

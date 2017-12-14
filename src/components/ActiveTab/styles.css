@@ -1,0 +1,29 @@
+.activeTab {
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+  justify-content: center;
+  align-items: center; }
+  .activeTab h2 {
+    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+    font-size: 24px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 300;
+    line-height: 20px;
+    text-align: center;
+    margin-bottom: 5vh;
+    margin-top: 5vh;
+    color: #aeaeae;
+    cursor: pointer; }
+  .activeTab h2.active {
+    font-weight: 600;
+    color: #000000; }
+  .activeTab hr {
+    display: inline-block;
+    width: 2px;
+    border: none;
+    background-color: #aeaeae;
+    height: 4vh;
+    margin-left: 10px;
+    margin-right: 10px; }

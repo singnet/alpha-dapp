@@ -2,13 +2,13 @@ import PropTypes from "prop-types"
 import Dropzone from "react-dropzone"
 import React, { Component } from "react"
 // assets
-import icon from "./assets/icons/upload.svg"
-import icon1 from "./assets/icons/file-uploaded.svg"
-const deleteIcon = require("./assets/icons/delete-document.png")
+import icon from "../assets/icons/upload.svg"
+import icon1 from "../assets/icons/file-uploaded.svg"
+const deleteIcon = require("../assets/icons/delete-document.png")
 // style
 // import "./styles.css"
 
-const FILE_TYPES = ["image/jpg", "image/png", "image/jpeg", "application/pdf"]
+const FILE_TYPES = ["image/jpg", "image/png", "image/jpeg"]
 
 export default class DocumentUploader extends Component {
 
@@ -35,7 +35,7 @@ export default class DocumentUploader extends Component {
   }
 
   renderChild() {
-    const { file, editable, handleRemove } = this.props
+    const { file, editable } = this.props
     const { preview } = this.state
 
     if (!editable) {
@@ -87,7 +87,6 @@ export default class DocumentUploader extends Component {
 DocumentUploader.propTypes = {
   editable: PropTypes.bool,
   handleUpload: PropTypes.func.isRequired,
-  handleRemove: PropTypes.func.isRequired,
   file: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
 }
 

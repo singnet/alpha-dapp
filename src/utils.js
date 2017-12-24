@@ -8,7 +8,6 @@ import {
 import axios from "axios"
 import toBuffer from "blob-to-buffer"
 import { encode } from "base64-arraybuffer"
-import { resolve } from "path";
 
 
 export function createSimpleMarketJob(web3, params, callback) {

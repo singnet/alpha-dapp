@@ -1,11 +1,27 @@
 import React from 'react'
-import JSONTree from 'react-json-tree'
+import Results from './Results'
 import DocumentUploader from './DocumentUploader'
 
 
-const DropZone = ({ file, onPay, onDrop, onNewJob, amount, result, dropZoneVisible, buttonVisible }) => {
+const DropZone = ({
+  file,
+  onPay,
+  onDrop,
+  onNewJob,
+  amount,
+  result,
+  dropZoneVisible,
+  buttonVisible
+}) => {
   return (
-    <div>
+    <div className="container-fluid">
+      {
+        !dropZoneVisible && result &&
+        <Results
+          predictions={result[0].predictions}
+          confidences={result[0].confidences}
+        />
+      }
       {
         buttonVisible &&
         <button
@@ -21,24 +37,20 @@ const DropZone = ({ file, onPay, onDrop, onNewJob, amount, result, dropZoneVisib
         dropZoneVisible &&
         <DocumentUploader
           file={file}
-          fetching={false}
-          editable={true}
+          editable={false}
           handleUpload={onDrop}
           error={''}
         />
       }
       {
-        result && <JSONTree data={result[0]} />
-      }
-      {
-        result && <button
+        /* result && <button
           type="sumbit"
           onClick={onNewJob}
           className="btn btn-primary"
           disabled={false}
         >
           New Job
-    </button>
+        </button> */
       }
     </div>
   )

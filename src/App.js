@@ -1,27 +1,27 @@
 import React, { Component } from 'react'
 import { Persist } from 'react-persist'
 
-import logo from './assets/logo/logo.svg'
 import ListOfAgents from './components/ListOfAgents'
 import Transactions from './components/Transactions'
 import ActiveTab from './components/ActiveTab'
 import DropZone from './components/DropZone'
+import Metamask from './components/Metamask'
 import Info from './components/Info'
 
+import logo from './assets/logo/logo.svg'
 import agentsJson from './agents.json'
 
 import './App.css'
 
-import { tokenAbi, tokenAddress, agentAddress, marketJobAbi } from './config'
+import { tokenAbi, tokenAddress, marketJobAbi } from './config'
 import {
   performJob,
   normalizeFile,
-  createMarketJob,
-  createSimpleMarketJob
+  createMarketJob
 } from './utils'
 
 
-const AMOUNT = 800000
+const milliseconds = 10 ** 3
 
 class App extends Component {
 
@@ -79,199 +79,218 @@ class App extends Component {
     clearInterval(this.accounBalanceInterval)
   }
 
+  watcher = (tx, cb) => {
+
+    this.w = setInterval(
+      () => this.web3.eth.getTransactionReceipt(
+        tx,
+        (err, receipt) => {
+          if (err) return
+          console.log("Waiting a mined block to include your contract")
+          if (receipt) {
+            cb(receipt)
+            console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
+            clearInterval(this.w)
+          }
+        }),
+      250
+    )
+  }
+
   getFile = () => {
     const { file } = this.state
 
     return file && [file]
   }
 
-
   setFile = ({ name, preview, type }) => {
-    const jobDesc = this.web3.fromAscii(preview)
-    const { contractAddress } = this.state
-    this.tokenContract.approve(contractAddress, AMOUNT, (err, allowance) => {
+    const { contractAddress, agent } = this.state
+    this.tokenContract.approve(contractAddress, agent.amount * milliseconds, (err, allowance) => {
+      if (err) return
+      this.setState({ isLoading: true })
+      if (allowance)
+        this.watcher(
+          allowance,
+          (receipt) => {
+            this.setState({
+              isLoading: false,
+              file: { name, payload: preview, type },
+              buttonVisible: true
+            })
+          }
+        )
 
-      this.setState({
-        file: { name, payload: preview, type },
-        buttonVisible: true,
-        jobDesc
-      })
     })
   }
 
   deposit = () => {
-    this.state.marketContract.deposit(AMOUNT, (err, result) => {
-      if (!err && result) {
-        this.handleAnalysis()
-          .then(console.log)
-          .catch(console.log)
-      }
-    })
-  }
-
-
-newJob = () => {
-  const { account } = this.state
-  const jobDesc = this.web3.fromAscii("ciao")
-
-  createMarketJob(
-    this.web3,
-    {
-      agent: account,
-      token: tokenAddress,
-      jobDesc
-    },
-    (err, result) => {
-      if (err) return
-      this.setState({ isLoading: true })
-      const watcher = setInterval(() => this.web3.eth.getTransactionReceipt(result.transactionHash, (err, receipt) => {
-        console.log("Waiting a mined block to include your contract")
-        if (receipt && receipt.contractAddress) {
-          const marketContract = this.web3.eth.contract(marketJobAbi).at(receipt.contractAddress)
-          this.setState({
-            contractAddress: receipt.contractAddress,
-            marketContract: marketContract,
-            isLoading: false,
-            jobDesc
-          })
-          console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
-          clearInterval(watcher)
-        }
-      }),
-        1000
-      )
-    }
-  )
-}
-
-directTransfer = () => {
-  this.tokenContract.transfer(
-    agentAddress,
-    this.amount,
-    {
-      from: this.web3.eth.accounts[0],
-      gas: 65000
-    },
-    async (err, result) => {
-      if (err) return
-      this.setState({ contractAddress: result })
-      await this.handleAnalysis()
-    }
-  )
-}
-
-handleAnalysis = async () => {
-  const { account, file, transactions, contractAddress } = this.state
-  const { payload, type, name } = file
-  //web3 integration 
-
-  // call the API 
-  this.setState({ isLoading: true })
-  const blob = await normalizeFile(name, payload)
-  try {
-    const job = await performJob(blob.payload, type)
-    const txs = transactions.slice()
-    txs.push({ from: account, to: contractAddress, result: job.data.result })
-    this.setState({
-      result: job.data.result,
-      buttonVisible: false,
-      dropZoneVisible: false,
-      isLoading: false,
-      transactions: txs
-    })
-  } catch (err) {
-    console.log('Error on analysis')
-    return
-  }
-}
-
-flush = () => {
-  this.setState({
-    buttonVisible: false,
-    dropZoneVisible: true,
-    marketContract: null,
-    contractAddress: null,
-    result: null,
-    file: false
-  }, () => this.newJob())
-}
-
-
-render() {
-  const {
-    file,
-    result,
-    account,
-    jobDesc,
-    isLoading,
-    activeIndex,
-    transactions,
-    web3Injected,
-    escrowBalance,
-    buttonVisible,
-    accountBalance,
-    contractAddress,
-    dropZoneVisible
+    const {
+      agent,
+      account,
+      transactions,
+      contractAddress,
+      marketContract
     } = this.state
 
-  if (!web3Injected) return <h1>Unlock Metamask and select the Kovan testnet</h1>
-  const url = "http://kovan.etherscan.io/address/" + contractAddress
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h1 className="App-title">SingularityNET Alpha</h1>
-      </header>
-      <br />
-      <Info
-        url={url}
-        account={account}
-        contractAddress={contractAddress}
-        accountBalance={accountBalance}
-        escrowBalance={escrowBalance}
-      />
-      <hr />
-      <ActiveTab
-        tabs={["Buy", "Transactions"]}
-        activeIndex={activeIndex}
-        handleChangeTab={activeIndex => this.setState({ activeIndex })}
-      />
+    marketContract.deposit(agent.amount * milliseconds, (err, result) => {
+      if (err) return
+      this.setState({ isLoading: true })
+      this.handleAnalysis()
+        .then((job) => {
+          const txs = transactions.slice()
+          txs.push({
+            from: account,
+            to: contractAddress,
+            result: job.data.result
+          })
+          console.log(txs)
+          this.setState({
+            result: job.data.result,
+            buttonVisible: false,
+            dropZoneVisible: false,
+            isLoading: false,
+            transactions: txs
+          })
+        })
+        .catch(console.log)
+    })
+  }
+
+
+  newJob = (agent) => {
+    const { account } = this.state
+    const jobDesc = this.web3.fromAscii("0x0")
+
+    createMarketJob(
+      this.web3,
       {
-        isLoading &&
-        <p>
-          Waiting a mined block to include your contract
-              <br />
-          <i className="fa fa-circle-o-notch fa-spin fa-5x"></i>
-        </p>
+        agent: account,
+        token: tokenAddress,
+        jobDesc
+      },
+      (err, result) => {
+        if (err) return
+        this.setState({ isLoading: true })
+        this.watcher(
+          result.transactionHash,
+          (receipt) => {
+            const marketContract = this.web3.eth.contract(marketJobAbi).at(receipt.contractAddress)
+            this.setState({
+              contractAddress: receipt.contractAddress,
+              marketContract: marketContract,
+              isLoading: false,
+              jobDesc,
+              agent
+            })
+          }
+        )
       }
-      {!contractAddress && activeIndex === 0 && <ListOfAgents
-        agents={agentsJson}
-        onHire={this.newJob}
-      />}
-      {
-        contractAddress && activeIndex === 0 && <DropZone
-          file={file}
-          result={result}
-          amount={AMOUNT}
-          onPay={this.deposit}
-          onDrop={this.setFile}
-          onNewJob={this.flush}
-          buttonVisible={buttonVisible}
-          dropZoneVisible={dropZoneVisible}
+    )
+  }
+
+  handleAnalysis = async () => {
+    const { file } = this.state
+    const { payload, type, name } = file
+    //web3 integration 
+
+    try {
+      const blob = await normalizeFile(name, payload)
+      return await performJob(blob.payload, type)
+    } catch (err) {
+      console.log('Error on analysis')
+      return new Error()
+    }
+  }
+
+  flush = () => {
+    this.setState({
+      buttonVisible: false,
+      dropZoneVisible: true,
+      marketContract: null,
+      contractAddress: null,
+      isLoading: false,
+      result: null,
+      file: false
+    })
+  }
+
+
+  render() {
+    const {
+      file,
+      agent,
+      result,
+      account,
+      isLoading,
+      activeIndex,
+      transactions,
+      web3Injected,
+      escrowBalance,
+      buttonVisible,
+      accountBalance,
+      contractAddress,
+      dropZoneVisible
+    } = this.state
+
+    if (!web3Injected || !account) return <Metamask />
+    const url = "http://kovan.etherscan.io/address/" + contractAddress
+    return (
+      <div className="App">
+        <header className="App-header">
+          <img src={logo} alt="logo" />
+        </header>
+        <br />
+        <Info
+          url={url}
+          account={account}
+          contractAddress={contractAddress}
+          accountBalance={accountBalance}
+          escrowBalance={escrowBalance}
         />
-      }
-      {
-        activeIndex === 1 && <Transactions data={transactions} />
-      }
-      <Persist
-        name="alpha"
-        data={this.state}
-        debounce={300}
-        onMount={data => this.setState(data)}
-      />
-    </div>
-  );
-}
+        <hr />
+        <ActiveTab
+          tabs={["Buy", "Transactions"]}
+          activeIndex={activeIndex}
+          handleChangeTab={activeIndex => this.setState({ activeIndex })}
+        />
+        <div className="container">
+          {
+            isLoading &&
+            <p>
+              Waiting a mined block to include your contract
+              <br />
+              <i className="fa fa-circle-o-notch fa-spin fa-5x"></i>
+            </p>
+          }
+          {!contractAddress && activeIndex === 0 && <ListOfAgents
+            agents={agentsJson}
+            onHire={this.newJob}
+          />}
+          {
+            contractAddress && activeIndex === 0 && <DropZone
+              file={file}
+              result={result}
+              amount={agent.amount * milliseconds}
+              onPay={this.deposit}
+              onDrop={this.setFile}
+              onNewJob={this.flush}
+              buttonVisible={buttonVisible}
+              dropZoneVisible={dropZoneVisible}
+            />
+          }
+          {
+            activeIndex === 1 && <Transactions data={transactions} />
+          }
+        </div>
+        <Persist
+          name="alpha"
+          data={{ transactions }}
+          debounce={100}
+          onMount={data => this.setState({ transactions })}
+        />
+      </div>
+    );
+  }
 }
 
 export default App

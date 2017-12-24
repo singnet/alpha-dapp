@@ -4,9 +4,7 @@ import React, { Component } from "react"
 // assets
 import icon from "../assets/icons/upload.svg"
 import icon1 from "../assets/icons/file-uploaded.svg"
-const deleteIcon = require("../assets/icons/delete-document.png")
 // style
-// import "./styles.css"
 
 const FILE_TYPES = ["image/jpg", "image/png", "image/jpeg"]
 
@@ -34,51 +32,34 @@ export default class DocumentUploader extends Component {
     } else { this.setState({ error: true }) }
   }
 
-  renderChild() {
-    const { file, editable } = this.props
+  render() {
     const { preview } = this.state
+    const { editable } = this.props
 
-    if (!editable) {
+    if (preview && !editable) {
       return (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", border: "dashed 1px #bbb", padding: 50 }}>
           <img style={{ width: 100, height: 100 }} src={icon1} alt="upload icon" />
         </div>
       )
     }
-    if (file) {
-      return (
-        <div style={styles.uploadedFile}>
-          <img src={preview} alt="uploaded image" />
-        </div>
-      )
-    }
 
-    return (
-      <Dropzone
-        onDrop={this.onDrop}
-        style={{ marginTop: 0 }}
-        className="dropzone upload-id-form justify-content-center dz-clickable"
-      >
-        <div className="dz-message needsclick">
-          <img src={icon} className="upload-img" alt="uploaded" />
-          <p>
-            Drag and drop your JPG image 
-            or <span className="blue">browse</span> from your file system 
-            </p>
-        </div>
-      </Dropzone>
-    )
-  }
-
-  render() {
     return (
       <div style={styles.container}>
-        {this.props.fetching
-          ? <div className={"loader"} />
-          : this.renderChild()
-        }
+        <Dropzone
+          onDrop={this.onDrop}
+          style={{ marginTop: 0 }}
+          className="dropzone upload-id-form justify-content-center dz-clickable"
+        >
+          <div className="dz-message needsclick">
+            <img src={icon} className="upload-img" alt="uploaded" />
+            <p>
+              Drag and drop your image
+          or <span className="blue">browse</span> from your file system
+          </p>
+          </div>
+        </Dropzone>
         {this.state.error && <span style={styles.error}>Invalid file</span>}
-        {this.props.error && <span style={styles.error}>{this.props.error}</span>}
       </div>
     )
   }

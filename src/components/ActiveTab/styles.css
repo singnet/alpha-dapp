@@ -5,7 +5,7 @@
   justify-content: center;
   align-items: center; }
   .activeTab h2 {
-    font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+    font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     font-size: 24px;
     font-style: normal;
     font-variant: normal;

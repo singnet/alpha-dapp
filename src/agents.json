@@ -1,7 +1,27 @@
 [
   {
-    "name": "Marco's Agent",
+    "name": "Sophia's Agent",
+    "service": "Facial Recognition",
+    "price": "5 per millisecond",
+    "available": false 
+  },
+  {
+    "name": "Robo's Agent",
     "service": "Image Analysis",
-    "price": "800000 per second"
+    "price": "8 per millisecond",
+    "amount": 8,
+    "available": true 
+  },
+  {
+    "name": "Einstein's Agent",
+    "service": "Emotion Detection",
+    "price": "20 per milliseconds",
+    "available": false 
+  },
+  {
+    "name": "Futura's Agent",
+    "service": "Document Summarization",
+    "price": "100000 per document",
+    "available": false 
   }
 ]

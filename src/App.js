@@ -56,15 +56,17 @@ class App extends Component {
           this.accounBalanceInterval = setInterval(() => {
             this.tokenContract.balanceOf(
               this.state.account,
-              (err, balance) => balance &&
-                balance !== this.state.accountBalance &&
+              (err, balance) => {
+                !err && balance && balance !== this.state.accountBalance &&
                 this.setState({ web3Injected: true, accountBalance: balance })
+              }
             )
+            //when someone initate a contract
             if (this.state.contractAddress) {
               this.tokenContract.balanceOf(
                 this.state.contractAddress,
                 (err, balance) => balance &&
-                  balance !== this.state.escrowBalance &&
+                  !err && balance !== this.state.escrowBalance &&
                   this.setState({ web3Injected: true, escrowBalance: balance })
               )
             }
@@ -86,14 +88,12 @@ class App extends Component {
         tx,
         (err, receipt) => {
           if (err) return
-          console.log("Waiting a mined block to include your contract")
-          if (receipt) {
+          if (!err && receipt) {
             cb(receipt)
-            console.log("Note that it might take 30 - 90 sceonds for the block to propagate befor it's visible in etherscan.io");
             clearInterval(this.w)
           }
         }),
-      250
+      500
     )
   }
 
@@ -143,14 +143,27 @@ class App extends Component {
             to: contractAddress,
             result: job.data.result
           })
-          console.log(txs)
-          this.setState({
-            result: job.data.result,
-            buttonVisible: false,
-            dropZoneVisible: false,
-            isLoading: false,
-            transactions: txs
-          })
+          console.log(result)
+          this.watcher(
+            result,
+            (receipt) => {
+              //@todo Kovan misses the status property in the transaction
+              //Hack: we are going to check if there are more than 0 logs in the receipt
+              if (receipt.logs.length > 0) {
+                this.setState({
+                  result: job.data.result,
+                  buttonVisible: false,
+                  dropZoneVisible: false,
+                  isLoading: false,
+                  transactions: txs
+                })
+              } else {
+                alert('Not enough funds! ')
+                this.flush()
+              }
+            } 
+          )
+        
         })
         .catch(console.log)
     })

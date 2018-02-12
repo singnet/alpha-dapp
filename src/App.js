@@ -13,6 +13,8 @@ import agentsJson from './agents.json'
 
 import './App.css'
 
+import pkg from '../package.json'
+
 import { tokenAbi, tokenAddress, marketJobAbi } from './config'
 import {
   performJob,
@@ -40,6 +42,7 @@ class App extends Component {
   }
 
   componentDidMount() {
+    console.log(`Version ${pkg.version}`)
     if (window.web3) {
       this.web3 = window.web3
       const that = this

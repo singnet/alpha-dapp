@@ -181,6 +181,7 @@ class App extends Component {
       this.web3,
       {
         agent: account,
+        amount: agent.amount,
         token: tokenAddress,
         jobDesc
       },

@@ -28,10 +28,10 @@ export function createSimpleMarketJob(web3, params, callback) {
 }
 
 export function createMarketJob(web3, params, callback) {
-  const { agent, token, jobDesc } = params
+  const { agent, token, jobDesc, amount } = params
   web3.eth.contract(marketJobAbi).new(
     [agent], // agents
-    [new web3.BigNumber(300000)], //amounts
+    [amount], //amounts
     [101], // services id
     token, //token address
     agent, // payer address

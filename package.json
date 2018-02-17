@@ -1,6 +1,6 @@
 {
   "name": "alpha",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "dependencies": {
     "axios": "^0.17.1",

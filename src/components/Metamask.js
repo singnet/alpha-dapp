@@ -9,6 +9,7 @@ const Metamask = () => {
         <img src={logo} alt="logo" />
       </header>
       <div className="container text-center">
+        <hr />
         <h2>Unlock Metamask and select the Kovan testnet</h2>
       </div>
     </div>

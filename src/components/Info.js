@@ -5,6 +5,7 @@ const Info = ({ url, account, contractAddress, accountBalance, escrowBalance }) 
   <div className="row">
     <div className="col-md-6 m-auto">
       <h2>Your account</h2>
+      <a className="btn btn-success" href="https://vulpemventures.github.io/faucet-erc20/" target="_blank">Get  Kovan AGI</a>
       <p>Balance <b> {(Number(accountBalance)/100000000).toString() || "0"} AGI</b></p>
       <QRCode value={account} />
       <br />

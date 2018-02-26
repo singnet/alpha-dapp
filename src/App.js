@@ -146,13 +146,13 @@ class App extends Component {
             to: contractAddress,
             result: job.data.result
           })
-          console.log(result)
           this.watcher(
             result,
             (receipt) => {
               //@todo Kovan misses the status property in the transaction
               //Hack: we are going to check if there are more than 0 logs in the receipt
-              if (receipt.logs.length > 0) {
+              //this issue has been closed https://github.com/MetaMask/metamask-extension/issues/2730
+              if (Number(receipt.status) === 1) {
                 this.setState({
                   result: job.data.result,
                   buttonVisible: false,

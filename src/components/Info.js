@@ -1,31 +1,93 @@
-import React from 'react'
-import QRCode from 'qrcode.react'
+import React from 'react';
+import QRCode from 'qrcode.react';
+import Card from 'antd/lib/card';
+import Icon from 'antd/lib/icon';
+import Divider from 'antd/lib/divider';
+import Button from 'antd/lib/button';
+import Row from 'antd/lib/row';
+import Col from 'antd/lib/col';
+import Tag from 'antd/lib/tag';
 
-const Info = ({ url, account, contractAddress, accountBalance, escrowBalance }) => (
-  <div className="row">
-    <div className="col-md-6 m-auto">
-      <h2>Your account</h2>
-      <a className="btn btn-success" href="https://vulpemventures.github.io/faucet-erc20/" target="_blank">Get  Kovan AGI</a>
-      <p>Balance <b> {(Number(accountBalance)/100000000).toString() || "0"} AGI</b></p>
-      <QRCode value={account} />
-      <br />
-      <b>{account}</b>
-    </div>
-    <div className="col-md-6">
-    {
-      contractAddress && (
-        <div>
-          <h2>Escrow</h2>
-          <p>Balance <b> {(Number(escrowBalance)/100000000).toString() || "0"} AGI</b></p>
-          <QRCode value={contractAddress} />
-          <br />
-          <b><a target="_blank" href={url}> {contractAddress}</a></b>
-        </div>
-      )
-    }
-    </div>
-    <br />
-  </div>
-)
+const Info = ({
+	url,
+	account,
+	contractAddress,
+	accountBalance,
+	escrowBalance,
+}) => (
+	<Row>
+		<Col span={11}>
+			<Card
+				title={
+					<React.Fragment>
+						<Icon type="user" />
+						<Divider type="vertical" />Account
+					</React.Fragment>
+				}
+				extra={
+					<Button
+						size="small"
+						type="primary"
+						href="https://vulpemventures.github.io/faucet-erc20/"
+						target="_blank"
+					>
+						Get Kovan AGI
+					</Button>
+				}
+			>
+				<Row>
+					<p>
+						Balance
+						<Divider type="vertical" />
+						<Tag>
+							{(Number(accountBalance) / 100000000).toString() || '0'} AGI
+						</Tag>
+					</p>
+					<p>
+						Address
+						<Divider type="vertical" />
+						<Tag>{account}</Tag>
+					</p>
+					<Divider />
+					<QRCode value={account} />
+				</Row>
+			</Card>
+		</Col>
+		{contractAddress && (
+			<Col span={11} offset={2}>
+				<Card
+					title={
+						<React.Fragment>
+							<Icon type="user" />
+							<Divider type="vertical" />Escrow
+						</React.Fragment>
+					}
+				>
+					<Row>
+						<p>
+							Balance
+							<Divider type="vertical" />
+							<Tag>
+								{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
+							</Tag>
+						</p>
+						<p>
+							Address
+							<Divider type="vertical" />
+							<Tag>
+								{/* REFACTOR use button */}
+								<a target="_blank" href={url}>
+									{contractAddress}
+								</a>
+							</Tag>
+						</p>
+						<Divider />
+						<QRCode value={contractAddress} />
+					</Row>
+				</Card>
+			</Col>
+		)}
+	</Row>
+);
 
-export default Info
+export default Info;

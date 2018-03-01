@@ -3,6 +3,7 @@
   "version": "0.0.7",
   "private": true,
   "dependencies": {
+    "antd": "^3.2.2",
     "axios": "^0.17.1",
     "base64-arraybuffer": "^0.1.5",
     "blob-to-buffer": "^1.2.6",

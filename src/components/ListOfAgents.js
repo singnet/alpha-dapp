@@ -1,48 +1,47 @@
-import React from 'react'
+import React from 'react';
+import Table from 'antd/lib/table';
+import Button from 'antd/lib/button';
 
-const ListOfAgents = ({ agents, onHire }) => (
-  <table className="table table-hover mx-auto">
-    <thead>
-      <tr>
-        <th>Agent</th>
-        <th>Service Offering</th>
-        <th>Price per Unit (COGS)</th>
-        <th>-</th>
-      </tr>
-    </thead>
-    <tbody>
-      {
-        Array.isArray(agents) && agents.map((currentAgent, index) => {
-          const {available, name, service, price} = currentAgent
-          let buttonText,backgroundColor
-          if (available) {
-            buttonText = "HIRE"
-            backgroundColor = "white"
-          } else {
-            buttonText = "OFF"
-            backgroundColor = "rgba(0,0,0,0.1)"
-          }
-          return (
-            <tr key={index} style={{backgroundColor}}>
-              <td>{name}</td>
-              <td>{service}</td>
-              <td>{price}</td>
-              <td>
-                <button
-                  className="btn btn-primary"
-                  disabled={!available}
-                  type="sumbit"
-                  onClick={() => onHire(currentAgent)}
-                >
-                  {buttonText}
-              </button>
-              </td>
-            </tr>
-          )
-        })
-      }
-    </tbody>
-  </table>
-)
+const columns = [
+	{
+		title: 'Agent',
+		dataIndex: 'name',
+		key: 'name',
+	},
+	{
+		title: 'Service',
+		dataIndex: 'service',
+		key: 'service',
+	},
+	{
+		title: 'Price per Unit (COGS)',
+		dataIndex: 'price',
+		key: 'price',
+	},
+	{
+		title: 'Available',
+		dataIndex: 'available',
+		key: 'available',
+	},
+];
 
-export default ListOfAgents
+const ListOfAgents = ({ agents, onHire }) => {
+	/*REFACTOR not clean */
+	columns[3]['render'] = (available, record, index) =>
+		available ? (
+			<Button type="primary" onClick={() => onHire(record)}>
+				HIRE
+			</Button>
+		) : (
+			<Button type="danger" disabled>
+				OFF
+			</Button>
+		);
+	return (
+		Array.isArray(agents) && (
+			<Table columns={columns} dataSource={agents} pagination={false} />
+		)
+	);
+};
+
+export default ListOfAgents;

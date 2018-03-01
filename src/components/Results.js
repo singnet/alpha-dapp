@@ -1,28 +1,40 @@
-import React from 'react'
+import React from 'react';
+import Table from 'antd/lib/table';
+import Alert from 'antd/lib/alert';
+
+const columns = [
+	{
+		title: 'Prediction',
+		dataIndex: 'prediction',
+		key: 'prediction',
+	},
+	{
+		title: 'Confidence',
+		dataIndex: 'confidence',
+		key: 'confidence',
+	},
+];
 
 const Results = ({ result, predictions, confidences }) => {
-  // if (Array.isArray(predictions) || predictions.length === 0) return <h3>No Results found </h3>
-  return (
-    <table className="table table-hover container">
-      <thead>
-        <tr>
-          <th>Predictions</th>
-          <th>Confidences</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          Array.isArray(predictions) &&
-          Array.isArray(confidences) &&
-          predictions[0].map((prediction, index) => (
-            <tr key={index}>
-              <td>{prediction}</td>
-              <td>{confidences[0][index]}</td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
-  )
-}
-export default Results
+	/* REFACTOR need divider like a comma or a new line between predictions */
+	const dataSource =
+		Array.isArray(predictions) &&
+		Array.isArray(confidences) &&
+		predictions.length !== 0 &&
+		predictions.map((prediction, index) => ({
+			prediction: prediction.reduce(
+				(accumulator, value) => `${value} ${accumulator} `,
+				''
+			),
+			confidence: confidences[index].reduce(
+				(accumulator, value) => `${value} ${accumulator}`,
+				''
+			),
+		}));
+	return dataSource ? (
+		<Table columns={columns} dataSource={dataSource} pagination={false} />
+	) : (
+		<Alert message="Something went wrong" type="error" showIcon />
+	);
+};
+export default Results;

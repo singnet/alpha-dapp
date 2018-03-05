@@ -14,12 +14,18 @@
     "react-dropzone": "^4.2.3",
     "react-json-tree": "^0.11.0",
     "react-persist": "^1.0.2",
-    "react-scripts": "1.0.17"
+    "react-scripts": "1.0.17",
+    "react-redux": "^5.0.7",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "remote-redux-devtools": "^0.5.12"
   }
 }

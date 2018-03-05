@@ -11,7 +11,7 @@ import {
 import { setNetworkId, setError } from "../actions/web3"
 import { updateTransactions } from "../actions/transactions"
 import { startWatching, stopWatching } from "../actions/watcher"
-import { setMarketJob, setMarketJobError } from "../actions/market"
+import { setMarketJob, setMarketJobError, updateMarketJobAmount } from "../actions/market"
 import { changeAccount, setAccountError, setTokenBalance, setTokenBalanceError } from "../actions/account"
 // utils
 import { normalizeFile, performJob } from "../utils"
@@ -19,7 +19,11 @@ import { normalizeFile, performJob } from "../utils"
 const { web3 } = window
 const tokenContract = web3.eth.contract(tokenAbi).at(tokenAddress)
 
-let marketJobContract, accountInterval, netInterval, tokenBalanceInterval
+let marketJobContract,
+    netInterval,
+    accountInterval,
+    tokenBalanceInterval,
+    escrowBalanceInterval
 
 export const watchAccount = () => {
   accountInterval = setInterval(
@@ -77,6 +81,26 @@ export const watchTokenBalance = () => {
   )
 }
 
+const watchEscrowBalance = () => {
+  escrowBalanceInterval = setInterval(
+    () => {
+      const { info } = store.getState().market
+
+      if (info) {
+        tokenContract.balanceOf(info.address, (err, res) => {
+          if (!err) {
+            const balance = Number(res.toString())
+            if (balance !== info.balance) {
+              store.dispatch(updateMarketJobAmount(balance))
+            }
+          }
+        })
+      }
+    },
+    500
+  )
+}
+
 export const createMarketJob = (payer, amount) => {
   const instance = web3.eth.contract(marketJobAbi)
 
@@ -101,6 +125,7 @@ export const createMarketJob = (payer, amount) => {
         if (res && res.transactionHash && res.address) {
           store.dispatch(setMarketJob({
             payer, amount,
+            balance: 0,
             agent: payer,
             address: res.address,
             jobDesc: web3.fromAscii("0x0"),
@@ -120,7 +145,6 @@ export const tokenApprove = (address, amount, callback) => {
   tokenContract.approve(address, amount, (err, txHash) => {
     if (err) { callback(err, null) }
     else {
-      console.log(txHash)
       watchTransaction(txHash, (err, res) => {
         if (err) { callback(err) }
         else { callback(null, res) }
@@ -133,6 +157,7 @@ export const depositAndAnalyze = (address, amount, file, callback) => {
   marketJobContract.deposit(amount, (err, txHash) => {
     if (err) { callback(err, null) }
     else {
+      watchEscrowBalance()
       watchTransaction(txHash, (err, res) => {
         if (err) { callback(err, null) }
         else {

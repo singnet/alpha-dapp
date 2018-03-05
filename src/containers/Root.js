@@ -62,7 +62,7 @@ class Root extends Component {
 	setFile = ({ name, preview, type }) => {
 		const { address, amount } = this.props.market.info;
 
-		tokenApprove(address, amount * milliseconds, (err, res) => {
+		tokenApprove(address, amount, (err, res) => {
 			if (err) {
 				return;
 			}
@@ -83,7 +83,7 @@ class Root extends Component {
 
 		depositAndAnalyze(
 			address,
-			amount * milliseconds,
+			amount,
 			this.state.file,
 			(err, res) => {
 				if (err) {
@@ -95,7 +95,7 @@ class Root extends Component {
 		);
 	};
 
-	newJob = agent => createMarketJob(this.props.account.address, agent.amount);
+	newJob = agent => createMarketJob(this.props.account.address, agent.amount * milliseconds);
 
 	render() {
 		const { file, buttonVisible, dropZoneVisible } = this.state;
@@ -125,7 +125,7 @@ class Root extends Component {
 								account={account.address}
 								contractAddress={market.info && market.info.address}
 								accountBalance={account.tokenBalance}
-								escrowBalance={0}
+								escrowBalance={market.info && market.info.balance}
 							/>
 							<Divider />
 							<Card
@@ -168,7 +168,7 @@ class Root extends Component {
 												transactions.length > 0 &&
 												transactions[transactions.length - 1].result
 											}
-											amount={market.info.amount * milliseconds}
+											amount={market.info.amount}
 											onPay={this.deposit}
 											onDrop={this.setFile}
 											buttonVisible={buttonVisible}

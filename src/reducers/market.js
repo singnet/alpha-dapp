@@ -5,6 +5,8 @@ const info = (state = null, action) => {
   switch (action.type) {
     case actionTypes.setMarketJob:
       return action.payload
+    case actionTypes.updateMarketJobAmount:
+      return { ...state, balance: action.payload }
     case actionTypes.setMarketJobError:
       return null
     default:

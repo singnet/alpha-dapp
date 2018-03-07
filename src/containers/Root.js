@@ -81,21 +81,17 @@ class Root extends Component {
 	deposit = () => {
 		const { address, amount } = this.props.market.info;
 
-		depositAndAnalyze(
-			address,
-			amount,
-			this.state.file,
-			(err, res) => {
-				if (err) {
-					alert('Something went wrong! ' + JSON.stringify(err));
-				} else {
-					this.setState({ buttonVisible: false, dropZoneVisible: false });
-				}
+		depositAndAnalyze(address, amount, this.state.file, (err, res) => {
+			if (err) {
+				alert('Something went wrong! ' + JSON.stringify(err));
+			} else {
+				this.setState({ buttonVisible: false, dropZoneVisible: false });
 			}
-		);
+		});
 	};
 
-	newJob = agent => createMarketJob(this.props.account.address, agent.amount * milliseconds);
+	newJob = agent =>
+		createMarketJob(this.props.account.address, agent.amount * milliseconds);
 
 	render() {
 		const { file, buttonVisible, dropZoneVisible } = this.state;
@@ -127,17 +123,6 @@ class Root extends Component {
 								accountBalance={account.tokenBalance}
 								escrowBalance={market.info && market.info.balance}
 							/>
-							<Divider />
-							<Card
-								title={
-									<React.Fragment>
-										<Icon type="table" />
-										<Divider type="vertical" />Transactions
-									</React.Fragment>
-								}
-							>
-								<Transactions data={transactions} />
-							</Card>
 							<Divider />
 							<Card
 								title={
@@ -179,6 +164,8 @@ class Root extends Component {
 									<ListOfAgents agents={agentsJson} onHire={this.newJob} />
 								)}
 							</Card>
+							<Divider />
+							<Transactions data={transactions} />
 						</Col>
 					</Row>
 				</Content>

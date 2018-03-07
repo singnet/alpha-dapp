@@ -34,6 +34,7 @@ const Info = ({
 						Get Kovan AGI
 					</Button>
 				}
+				style={{ height: '380px' }}
 			>
 				<Row>
 					<p>
@@ -62,6 +63,7 @@ const Info = ({
 							<Divider type="vertical" />Escrow
 						</React.Fragment>
 					}
+					style={{ height: '380px' }}
 				>
 					<Row>
 						<p>

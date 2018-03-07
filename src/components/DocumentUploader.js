@@ -5,6 +5,7 @@ import Card from 'antd/lib/card';
 import Icon from 'antd/lib/icon';
 import Row from 'antd/lib/row';
 import Alert from 'antd/lib/alert';
+import Divider from 'antd/lib/divider';
 
 const FILE_TYPES = ['image/jpg', 'image/png', 'image/jpeg'];
 
@@ -52,10 +53,17 @@ export default class DocumentUploader extends Component {
 				{/* REFACTOR remove dropzone and use antd uploader */}
 				<Dropzone onDrop={this.onDrop} style={{ marginTop: '0px' }}>
 					<Card
-						title={<Icon type="inbox" />}
-						style={{ padding: '0px 20px', width: '100%' }}
+						style={{
+							padding: '0px 20px',
+							width: '100%',
+							border: '1px dashed #d9d9d9',
+							borderRadius: '4px',
+							background: '#fafafa',
+							textAlign: 'center',
+						}}
 					>
-						Drag and drop your image or browse from your file system.
+						<Icon type="inbox" />
+						<Divider />Drag and drop your image or browse from your file system.
 					</Card>
 				</Dropzone>
 				{/*Show image upload error*/}

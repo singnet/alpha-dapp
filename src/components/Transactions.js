@@ -32,7 +32,7 @@ const Transactions = ({ data }) => {
 		Array.isArray(data) &&
 		data.map(entry => ({
 			...entry,
-			result: flatten(
+			result: Array.isArray(entry.result) ? flatten(
 				entry.result.map(
 					({ predictions, confidences }) =>
 						Array.isArray(predictions) &&
@@ -49,7 +49,7 @@ const Transactions = ({ data }) => {
 							),
 						}))
 				)
-			),
+			) : [],
 		}));
 	return (
 		<Card

@@ -1,49 +1,9 @@
 import {
-  agentUrl,
-  marketJobAbi,
-  marketJobBytecode,
-  simpleMarketJobAbi,
-  simpleMarketJobBytecode
+  agentUrl
 } from "./config"
 import axios from "axios"
 import toBuffer from "blob-to-buffer"
 import { encode } from "base64-arraybuffer"
-
-
-export function createSimpleMarketJob(web3, params, callback) {
-  // create contract
-  const { agent, token, jobDesc } = params
-  console.log(agent, token, jobDesc)
-  web3.eth.contract(simpleMarketJobAbi).new(
-    agent, // agents
-    token, //token address
-    web3.fromAscii(jobDesc), // job descriptor
-    {
-      from: agent,
-      data: simpleMarketJobBytecode,
-      gas: 500000
-    },
-    callback
-  )
-}
-
-export function createMarketJob(web3, params, callback) {
-  const { agent, token, jobDesc, amount } = params
-  web3.eth.contract(marketJobAbi).new(
-    [agent], // agents
-    [amount], //amounts
-    [101], // services id
-    token, //token address
-    agent, // payer address
-    jobDesc, // first bytes packet
-    {
-      from: agent,
-      data: marketJobBytecode,
-      gas: 1200000
-    },
-    callback
-  )
-}
 
 export const performJob = (blob, type) => 
   new Promise((resolve,reject) => {

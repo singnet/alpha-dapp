@@ -4,8 +4,8 @@ import store from '../store';
 import {
 	tokenAbi,
 	tokenAddress,
-	marketJobAbi,
-	marketJobBytecode,
+	escrowAbi,
+	escrowBytecode,
 } from '../config';
 // actions
 import { setNetworkId, setError } from '../actions/web3';
@@ -108,20 +108,20 @@ const watchEscrowBalance = () => {
 	}, 500);
 };
 
-export const createMarketJob = (payer, amount) => {
-	const instance = web3.eth.contract(marketJobAbi);
+export const createEscrow = (payer, payee, amount) => {
+	const instance = web3.eth.contract(escrowAbi);
 
 	instance.new(
-		[payer], // agents
-		[amount], //amounts
-		[101], // services id
-		tokenAddress, //token address
-		payer, // payer address
-		web3.fromAscii('0x0'), // first bytes packet
+		tokenAddress, // token
+		payer, //payer
+		payee, // payee
+		30000, //timelock
+		payer, //validator
+		0,		 //reward
 		{
 			from: payer,
-			data: marketJobBytecode,
-			gas: 1200000,
+			data: escrowBytecode,
+			gas: 1500000,
 		},
 		(err, res) => {
 			if (err) {
@@ -132,11 +132,11 @@ export const createMarketJob = (payer, amount) => {
 					store.dispatch(
 						setMarketJob({
 							payer,
+							payee,
 							amount,
 							balance: 0,
-							agent: payer,
-							address: res.address,
-							jobDesc: web3.fromAscii('0x0'),
+							agent: payee,
+							address: res.address
 						})
 					);
 
@@ -166,8 +166,8 @@ export const tokenApprove = (address, amount, callback) => {
 	});
 };
 
-export const depositAndAnalyze = (address, amount, file, callback) => {
-	marketJobContract.deposit(amount, (err, txHash) => {
+export const depositAndAnalyze = (payer, amount, file, callback) => {
+	marketJobContract.deposit(amount, "0x01", (err, txHash) => {
 		if (err) {
 			callback(err, null);
 		} else {
@@ -184,8 +184,8 @@ export const depositAndAnalyze = (address, amount, file, callback) => {
 								updateTransactions([
 									{
 										result,
-										to: address,
-										from: marketJobContract.address,
+										to: marketJobContract.address,
+										from: payer,
 									},
 								])
 							);

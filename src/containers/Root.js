@@ -24,7 +24,7 @@ import {
 import {
 	watchAccount,
 	tokenApprove,
-	createMarketJob,
+	createEscrow,
 	depositAndAnalyze,
 	watchTokenBalance,
 	stopWatchingAccount,
@@ -79,9 +79,9 @@ class Root extends Component {
 	};
 
 	deposit = () => {
-		const { address, amount } = this.props.market.info;
+		const { payer, amount } = this.props.market.info;
 
-		depositAndAnalyze(address, amount, this.state.file, (err, res) => {
+		depositAndAnalyze(payer, amount, this.state.file, (err, res) => {
 			if (err) {
 				alert('Something went wrong! ' + JSON.stringify(err));
 			} else {
@@ -91,7 +91,7 @@ class Root extends Component {
 	};
 
 	newJob = agent =>
-		createMarketJob(this.props.account.address, agent.amount * milliseconds);
+		createEscrow(this.props.account.address, agent.address, agent.amount * milliseconds);
 
 	render() {
 		const { file, buttonVisible, dropZoneVisible } = this.state;

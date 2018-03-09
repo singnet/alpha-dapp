@@ -8,6 +8,9 @@ import Row from 'antd/lib/row';
 import Col from 'antd/lib/col';
 import Tag from 'antd/lib/tag';
 
+// config
+import { network } from '../config';
+
 const Info = ({
 	url,
 	account,
@@ -50,7 +53,16 @@ const Info = ({
 						Address
 						<Divider type="vertical" />
 						<Tag>
-							<p>{account}</p>
+							<a
+								target="_blank"
+								href={
+									network &&
+									account &&
+									`https://${network}.etherscan.io/address/${account}`
+								}
+							>
+								{account}
+							</a>
 						</Tag>
 					</p>
 					<Divider />

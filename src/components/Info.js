@@ -41,13 +41,17 @@ const Info = ({
 						Balance
 						<Divider type="vertical" />
 						<Tag>
-							{(Number(accountBalance) / 100000000).toString() || '0'} AGI
+							<p>
+								{(Number(accountBalance) / 100000000).toString() || '0'} AGI
+							</p>
 						</Tag>
 					</p>
 					<p>
 						Address
 						<Divider type="vertical" />
-						<Tag>{account}</Tag>
+						<Tag>
+							<p>{account}</p>
+						</Tag>
 					</p>
 					<Divider />
 					<QRCode value={account} />
@@ -70,7 +74,9 @@ const Info = ({
 							Balance
 							<Divider type="vertical" />
 							<Tag>
-								{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
+								<p>
+									{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
+								</p>
 							</Tag>
 						</p>
 						<p>

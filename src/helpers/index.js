@@ -26,7 +26,7 @@ import {
 import { normalizeFile, performJob } from '../utils';
 
 const { web3 } = window;
-const tokenContract = web3.eth.contract(tokenAbi).at(tokenAddress);
+const tokenContract = web3 && web3.eth.contract(tokenAbi).at(tokenAddress);
 
 let marketJobContract,
 	netInterval,

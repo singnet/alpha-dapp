@@ -18,8 +18,8 @@ const Info = ({
 	accountBalance,
 	escrowBalance,
 }) => (
-	<Row>
-		<Col span={11}>
+	<React.Fragment>
+		<Row>
 			<Card
 				title={
 					<React.Fragment>
@@ -37,57 +37,15 @@ const Info = ({
 						Get Kovan AGI
 					</Button>
 				}
-				style={{ height: '380px' }}
 			>
 				<Row>
-					<p>
-						Balance
-						<Divider type="vertical" />
-						<Tag>
-							<p>
-								{(Number(accountBalance) / 100000000).toString() || '0'} AGI
-							</p>
-						</Tag>
-					</p>
-					<p>
-						Address
-						<Divider type="vertical" />
-						<Tag>
-							<a
-								target="_blank"
-								href={
-									network &&
-									account &&
-									`https://${network}.etherscan.io/address/${account}`
-								}
-							>
-								{account}
-							</a>
-						</Tag>
-					</p>
-					<Divider />
-					<QRCode value={account} />
-				</Row>
-			</Card>
-		</Col>
-		{contractAddress && (
-			<Col span={11} offset={2}>
-				<Card
-					title={
-						<React.Fragment>
-							<Icon type="user" />
-							<Divider type="vertical" />Escrow
-						</React.Fragment>
-					}
-					style={{ height: '380px' }}
-				>
-					<Row>
+					<Col span={19}>
 						<p>
 							Balance
 							<Divider type="vertical" />
 							<Tag>
 								<p>
-									{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
+									{(Number(accountBalance) / 100000000).toString() || '0'} AGI
 								</p>
 							</Tag>
 						</p>
@@ -95,19 +53,65 @@ const Info = ({
 							Address
 							<Divider type="vertical" />
 							<Tag>
-								{/* REFACTOR use button */}
-								<a target="_blank" href={url}>
-									{contractAddress}
+								<a
+									target="_blank"
+									href={
+										network &&
+										account &&
+										`https://${network}.etherscan.io/address/${account}`
+									}
+								>
+									{account}
 								</a>
 							</Tag>
 						</p>
-						<Divider />
-						<QRCode value={contractAddress} />
+					</Col>
+					<Col span={5}>
+						<QRCode value={account} />
+					</Col>
+				</Row>
+			</Card>
+		</Row>
+		{contractAddress && (
+			<Row style={{ marginTop: 40 }}>
+				<Card
+					title={
+						<React.Fragment>
+							<Icon type="user" />
+							<Divider type="vertical" />Escrow
+						</React.Fragment>
+					}
+				>
+					<Row>
+						<Col span={19}>
+							<p>
+								Balance
+								<Divider type="vertical" />
+								<Tag>
+									<p>
+										{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
+									</p>
+								</Tag>
+							</p>
+							<p>
+								Address
+								<Divider type="vertical" />
+								<Tag>
+									{/* REFACTOR use button */}
+									<a target="_blank" href={url}>
+										{contractAddress}
+									</a>
+								</Tag>
+							</p>
+						</Col>
+						<Col span={5}>
+							<QRCode value={contractAddress} />
+						</Col>
 					</Row>
 				</Card>
-			</Col>
+			</Row>
 		)}
-	</Row>
+	</React.Fragment>
 );
 
 export default Info;

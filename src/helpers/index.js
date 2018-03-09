@@ -1,12 +1,7 @@
 // store
 import store from '../store';
 // config
-import {
-	tokenAbi,
-	tokenAddress,
-	escrowAbi,
-	escrowBytecode,
-} from '../config';
+import { tokenAbi, tokenAddress, escrowAbi, escrowBytecode } from '../config';
 // actions
 import { setNetworkId, setError } from '../actions/web3';
 import { updateTransactions } from '../actions/transactions';
@@ -117,7 +112,7 @@ export const createEscrow = (payer, payee, amount) => {
 		payee, // payee
 		30000, //timelock
 		payer, //validator
-		0,		 //reward
+		0, //reward
 		{
 			from: payer,
 			data: escrowBytecode,
@@ -136,7 +131,7 @@ export const createEscrow = (payer, payee, amount) => {
 							amount,
 							balance: 0,
 							agent: payee,
-							address: res.address
+							address: res.address,
 						})
 					);
 
@@ -167,7 +162,7 @@ export const tokenApprove = (address, amount, callback) => {
 };
 
 export const depositAndAnalyze = (payer, amount, file, callback) => {
-	marketJobContract.deposit(amount, "0x01", (err, txHash) => {
+	marketJobContract.deposit(amount, '0x01', (err, txHash) => {
 		if (err) {
 			callback(err, null);
 		} else {

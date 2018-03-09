@@ -1,7 +1,7 @@
  //kovan
 import escrowJson from './abi/escrowAbi.json'
 import tokenJson from './abi/tokenAbi.json'
-export const agentUrl = "http://agent.singularitynet.io:8000/api"
+export const agentUrl = "https://agent.singularitynet.io/api"
 
 
 export const tokenAddress = "0x3b226ff6aad7851d3263e53cb7688d13a07f6e81"

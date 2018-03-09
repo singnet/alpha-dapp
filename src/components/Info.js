@@ -8,6 +8,8 @@ import Row from 'antd/lib/row';
 import Col from 'antd/lib/col';
 import Tag from 'antd/lib/tag';
 
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
 // config
 import { network } from '../config';
 
@@ -44,10 +46,14 @@ const Info = ({
 							Balance
 							<Divider type="vertical" />
 							<Tag>
-								<p>
-									{(Number(accountBalance) / 100000000).toString() || '0'} AGI
-								</p>
+								{(Number(accountBalance) / 100000000).toString() || '0'} AGI
 							</Tag>
+							<Divider type="vertical" />
+							<CopyToClipboard text={Number(accountBalance) / 100000000}>
+								<a>
+									<Icon type="copy" />
+								</a>
+							</CopyToClipboard>
 						</p>
 						<p>
 							Address
@@ -64,6 +70,12 @@ const Info = ({
 									{account}
 								</a>
 							</Tag>
+							<Divider type="vertical" />
+							<CopyToClipboard text={account}>
+								<a>
+									<Icon type="copy" />
+								</a>
+							</CopyToClipboard>
 						</p>
 					</Col>
 					<Col span={5}>
@@ -88,10 +100,14 @@ const Info = ({
 								Balance
 								<Divider type="vertical" />
 								<Tag>
-									<p>
-										{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
-									</p>
+									{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
 								</Tag>
+								<Divider type="vertical" />
+								<CopyToClipboard text={Number(escrowBalance) / 100000000}>
+									<a>
+										<Icon type="copy" />
+									</a>
+								</CopyToClipboard>
 							</p>
 							<p>
 								Address
@@ -102,6 +118,12 @@ const Info = ({
 										{contractAddress}
 									</a>
 								</Tag>
+								<Divider type="vertical" />
+								<CopyToClipboard text={contractAddress}>
+									<a>
+										<Icon type="copy" />
+									</a>
+								</CopyToClipboard>
 							</p>
 						</Col>
 						<Col span={5}>

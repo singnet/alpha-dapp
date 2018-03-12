@@ -7,7 +7,9 @@ import Row from 'antd/lib/row';
 import Button from 'antd/lib/button';
 import Divider from 'antd/lib/divider';
 import Tag from 'antd/lib/tag';
+
 import { flatten, isEmpty } from 'lodash';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 // REFACTOR move these out with next code refactor
 // need it for DELETE ALL transactions
@@ -84,10 +86,24 @@ const Transactions = ({ data }) => {
 						style={index > 0 ? { marginTop: '30px' } : { marginTop: '0px' }}
 					>
 						<Row style={{ margin: '18px' }}>
-							<Tag>From</Tag> <Divider type="vetical" /> <Tag>{from}</Tag>
+							<Tag>From</Tag> <Divider type="vetical" />
+							<Tag>{`${from.substring(0, 15)}...`}</Tag>
+							<Divider type="vertical" />
+							<CopyToClipboard text={from}>
+								<a>
+									<Icon type="copy" />
+								</a>
+							</CopyToClipboard>
 						</Row>
 						<Row style={{ margin: '18px' }}>
-							<Tag>To</Tag> <Divider type="vetical" /> <Tag>{to}</Tag>
+							<Tag>To</Tag> <Divider type="vetical" />
+							<Tag>{`${to.substring(0, 15)}...`}</Tag>
+							<Divider type="vertical" />
+							<CopyToClipboard text={to}>
+								<a>
+									<Icon type="copy" />
+								</a>
+							</CopyToClipboard>
 						</Row>
 						<Divider />
 						<Table columns={columns} pagination={false} dataSource={result} />

@@ -41,7 +41,7 @@ const Info = ({
 				}
 			>
 				<Row>
-					<Col span={19}>
+					<Col xs={24} sm={19} md={19} lg={19} xl={19}>
 						<p>
 							Balance
 							<Divider type="vertical" />
@@ -67,7 +67,7 @@ const Info = ({
 										`https://${network}.etherscan.io/address/${account}`
 									}
 								>
-									{account}
+									{`${account.substring(0, 10)}...`}
 								</a>
 							</Tag>
 							<Divider type="vertical" />
@@ -95,7 +95,7 @@ const Info = ({
 					}
 				>
 					<Row>
-						<Col span={19}>
+						<Col xs={24} sm={19} md={19} lg={19} xl={19}>
 							<p>
 								Balance
 								<Divider type="vertical" />
@@ -115,7 +115,7 @@ const Info = ({
 								<Tag>
 									{/* REFACTOR use button */}
 									<a target="_blank" href={url}>
-										{contractAddress}
+										{`${contractAddress.substring(0, 10)}...`}
 									</a>
 								</Tag>
 								<Divider type="vertical" />

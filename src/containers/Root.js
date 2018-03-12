@@ -116,7 +116,14 @@ class Root extends Component {
 				</Header>
 				<Content>
 					<Row type="flex" justify="center">
-						<Col span={15} md={22} lg={15} style={{ marginTop: '40px' }}>
+						<Col
+							xs={24}
+							sm={24}
+							md={22}
+							lg={15}
+							xl={18}
+							style={{ marginTop: '40px' }}
+						>
 							<Info
 								url={url}
 								account={account.address}

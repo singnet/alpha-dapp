@@ -33,7 +33,7 @@ const DropZone = ({
 					onClick={onPay}
 					style={{ width: '100%', marginBottom: '20px' }}
 				>
-					Pay {amount} COGS to elaborate image
+					Pay {amount} COGS to analize image
 				</Button>
 			)}
 			{dropZoneVisible && (

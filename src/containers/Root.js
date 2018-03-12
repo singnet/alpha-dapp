@@ -101,6 +101,7 @@ class Root extends Component {
 			market,
 			transactions,
 			waitingForTransaction,
+			waitingForAnalysis,
 		} = this.props;
 
 		if (!account.address || !isKovanNetwork) return <Metamask />;
@@ -144,6 +145,18 @@ class Root extends Component {
 										<Divider />
 									</React.Fragment>
 								)}
+								{/* Phase 3 */}
+								{waitingForAnalysis && (
+									<React.Fragment>
+										<Spin>
+											<Alert
+												message="Waiting for image analysis"
+												type="warning"
+											/>
+										</Spin>
+										<Divider />
+									</React.Fragment>
+								)}
 								{/* Phase 2*/}
 								{market.info &&
 									market.info.address && (
@@ -175,11 +188,19 @@ class Root extends Component {
 	}
 }
 
-const mapStateToProps = ({ account, web3, market, transactions, watcher }) => ({
+const mapStateToProps = ({
+	account,
+	web3,
+	market,
+	transactions,
+	watcher,
+	analysisWatcher,
+}) => ({
 	account,
 	market,
 	transactions,
 	waitingForTransaction: watcher,
+	waitingForAnalysis: analysisWatcher,
 	isKovanNetwork: web3.networkId === '42',
 });
 const mapDispatchToProps = () => ({});

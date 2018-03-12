@@ -7,6 +7,10 @@ import { setNetworkId, setError } from '../actions/web3';
 import { updateTransactions } from '../actions/transactions';
 import { startWatching, stopWatching } from '../actions/watcher';
 import {
+	startWatchingAnalysis,
+	stopWatchingAnalysis,
+} from '../actions/analysisWatcher';
+import {
 	setMarketJob,
 	setMarketJobError,
 	updateMarketJobAmount,
@@ -194,15 +198,21 @@ export const depositAndAnalyze = (payer, amount, file, callback) => {
 };
 
 const handleAnalysis = ({ payload, type, name }, callback) => {
+	store.dispatch(startWatchingAnalysis());
 	normalizeFile(name, payload)
 		.then(blob => performJob(blob.payload, type))
-		.then(({ data: { result } }) => callback(null, result))
-		.catch(({ response: { data: { error } } }) => callback(error, null));
+		.then(
+			({ data: { result } }) =>
+				store.dispatch(stopWatchingAnalysis()) && callback(null, result)
+		)
+		.catch(
+			({ response: { data: { error } } }) =>
+				store.dispatch(stopWatchingAnalysis()) && callback(error, null)
+		);
 };
 
 export const watchTransaction = (hash, callback) => {
 	store.dispatch(startWatching());
-
 	const interval = setInterval(
 		() =>
 			web3.eth.getTransactionReceipt(hash, (err, res) => {

@@ -215,11 +215,22 @@ export const watchTransaction = (hash, callback) => {
 				if (!err) {
 					if (res) {
 						if (Number(res.status)) {
-							callback(null, res);
+							web3.eth.getTransaction(hash, (err, transaction) => {
+								if (!err){
+									if (res.gasUsed === transaction.gas) {
+										callback('Code execution failed', null)
+									} else {
+										callback(null, res);
+									}
+								} else {
+									callback('Something went wrong while recovering your transaction', null);
+								};
+								store.dispatch(stopWatching());
+							});
 						} else {
 							callback('Transaction failed with status 0', null);
+							store.dispatch(stopWatching());
 						}
-						store.dispatch(stopWatching());
 						clearInterval(interval);
 					}
 				} else {

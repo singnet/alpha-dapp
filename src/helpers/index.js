@@ -27,11 +27,7 @@ import { normalizeFile, performJob } from '../utils';
 const { web3 } = window;
 const tokenContract = web3 && web3.eth.contract(tokenAbi).at(tokenAddress);
 
-let marketJobContract,
-	netInterval,
-	accountInterval,
-	tokenBalanceInterval,
-	escrowBalanceInterval;
+let marketJobContract, netInterval, accountInterval, tokenBalanceInterval;
 
 export const watchAccount = () => {
 	accountInterval = setInterval(() => {
@@ -91,7 +87,7 @@ export const watchTokenBalance = () => {
 };
 
 const watchEscrowBalance = () => {
-	escrowBalanceInterval = setInterval(() => {
+	setInterval(() => {
 		const { info } = store.getState().market;
 
 		if (info) {

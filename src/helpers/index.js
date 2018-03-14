@@ -217,10 +217,13 @@ export const watchTransaction = (hash, callback) => {
 						if (Number(res.status)) {
 							web3.eth.getTransaction(hash, (err, transaction) => {
 								if (!err) {
-									if (res.gasUsed === transaction.gas) {
-										callback('Code execution failed', null);
-									} else {
-										callback(null, res);
+									if (transaction) {
+										// it could happen that both err and transaction are null
+										if (res.gasUsed === transaction.gas) {
+											callback('Code execution failed', null);
+										} else {
+											callback(null, res);
+										}
 									}
 								} else {
 									callback(

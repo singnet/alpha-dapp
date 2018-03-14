@@ -7,6 +7,7 @@ import Row from 'antd/lib/row';
 import Button from 'antd/lib/button';
 import Divider from 'antd/lib/divider';
 import Tag from 'antd/lib/tag';
+import message from 'antd/lib/message';
 
 import { flatten, isEmpty } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -89,7 +90,10 @@ const Transactions = ({ data }) => {
 							<Tag>From</Tag> <Divider type="vetical" />
 							<Tag>{`${from.substring(0, 15)}...`}</Tag>
 							<Divider type="vertical" />
-							<CopyToClipboard text={from}>
+							<CopyToClipboard
+								text={from}
+								onCopy={() => message.success('Sender copied', 1)}
+							>
 								<a>
 									<Icon type="copy" />
 								</a>
@@ -99,7 +103,10 @@ const Transactions = ({ data }) => {
 							<Tag>To</Tag> <Divider type="vetical" />
 							<Tag>{`${to.substring(0, 15)}...`}</Tag>
 							<Divider type="vertical" />
-							<CopyToClipboard text={to}>
+							<CopyToClipboard
+								text={to}
+								onCopy={() => message.success('Receiver copied', 1)}
+							>
 								<a>
 									<Icon type="copy" />
 								</a>

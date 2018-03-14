@@ -7,6 +7,7 @@ import Button from 'antd/lib/button';
 import Row from 'antd/lib/row';
 import Col from 'antd/lib/col';
 import Tag from 'antd/lib/tag';
+import message from 'antd/lib/message';
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
@@ -49,7 +50,10 @@ const Info = ({
 								{(Number(accountBalance) / 100000000).toString() || '0'} AGI
 							</Tag>
 							<Divider type="vertical" />
-							<CopyToClipboard text={Number(accountBalance) / 100000000}>
+							<CopyToClipboard
+								text={Number(accountBalance) / 100000000}
+								onCopy={() => message.success('Account balance copied', 1)}
+							>
 								<a>
 									<Icon type="copy" />
 								</a>
@@ -71,7 +75,10 @@ const Info = ({
 								</a>
 							</Tag>
 							<Divider type="vertical" />
-							<CopyToClipboard text={account}>
+							<CopyToClipboard
+								text={account}
+								onCopy={() => message.success('Account address copied', 1)}
+							>
 								<a>
 									<Icon type="copy" />
 								</a>
@@ -103,7 +110,10 @@ const Info = ({
 									{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
 								</Tag>
 								<Divider type="vertical" />
-								<CopyToClipboard text={Number(escrowBalance) / 100000000}>
+								<CopyToClipboard
+									text={Number(escrowBalance) / 100000000}
+									onCopy={() => message.success('Escrow balance copied', 1)}
+								>
 									<a>
 										<Icon type="copy" />
 									</a>
@@ -119,7 +129,10 @@ const Info = ({
 									</a>
 								</Tag>
 								<Divider type="vertical" />
-								<CopyToClipboard text={contractAddress}>
+								<CopyToClipboard
+									text={contractAddress}
+									onCopy={() => message.success('Escrow address copied', 1)}
+								>
 									<a>
 										<Icon type="copy" />
 									</a>

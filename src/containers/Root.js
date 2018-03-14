@@ -101,6 +101,7 @@ class Root extends Component {
 			market,
 			transactions,
 			waitingForTransaction,
+			waitingForAnalysis,
 		} = this.props;
 
 		if (!account.address || !isKovanNetwork) return <Metamask />;
@@ -115,7 +116,14 @@ class Root extends Component {
 				</Header>
 				<Content>
 					<Row type="flex" justify="center">
-						<Col span={15} style={{ marginTop: '40px' }}>
+						<Col
+							xs={24}
+							sm={24}
+							md={22}
+							lg={15}
+							xl={18}
+							style={{ marginTop: '40px' }}
+						>
 							<Info
 								url={url}
 								account={account.address}
@@ -139,6 +147,18 @@ class Root extends Component {
 											<Alert
 												message="Waiting a mined block to include your contract"
 												type="info"
+											/>
+										</Spin>
+										<Divider />
+									</React.Fragment>
+								)}
+								{/* Phase 3 */}
+								{waitingForAnalysis && (
+									<React.Fragment>
+										<Spin>
+											<Alert
+												message="Waiting for image analysis"
+												type="warning"
 											/>
 										</Spin>
 										<Divider />
@@ -175,11 +195,19 @@ class Root extends Component {
 	}
 }
 
-const mapStateToProps = ({ account, web3, market, transactions, watcher }) => ({
+const mapStateToProps = ({
+	account,
+	web3,
+	market,
+	transactions,
+	watcher,
+	analysisWatcher,
+}) => ({
 	account,
 	market,
 	transactions,
 	waitingForTransaction: watcher,
+	waitingForAnalysis: analysisWatcher,
 	isKovanNetwork: web3.networkId === '42',
 });
 const mapDispatchToProps = () => ({});

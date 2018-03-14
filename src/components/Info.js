@@ -7,6 +7,12 @@ import Button from 'antd/lib/button';
 import Row from 'antd/lib/row';
 import Col from 'antd/lib/col';
 import Tag from 'antd/lib/tag';
+import message from 'antd/lib/message';
+
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+
+// config
+import { network } from '../config';
 
 const Info = ({
 	url,
@@ -15,8 +21,8 @@ const Info = ({
 	accountBalance,
 	escrowBalance,
 }) => (
-	<Row>
-		<Col span={11}>
+	<React.Fragment>
+		<Row>
 			<Card
 				title={
 					<React.Fragment>
@@ -34,28 +40,59 @@ const Info = ({
 						Get Kovan AGI
 					</Button>
 				}
-				style={{ height: '380px' }}
 			>
 				<Row>
-					<p>
-						Balance
-						<Divider type="vertical" />
-						<Tag>
-							{(Number(accountBalance) / 100000000).toString() || '0'} AGI
-						</Tag>
-					</p>
-					<p>
-						Address
-						<Divider type="vertical" />
-						<Tag>{account}</Tag>
-					</p>
-					<Divider />
-					<QRCode value={account} />
+					<Col xs={24} sm={19} md={19} lg={19} xl={19}>
+						<p>
+							Balance
+							<Divider type="vertical" />
+							<Tag>
+								{(Number(accountBalance) / 100000000).toString() || '0'} AGI
+							</Tag>
+							<Divider type="vertical" />
+							<CopyToClipboard
+								text={Number(accountBalance) / 100000000}
+								onCopy={() => message.success('Account balance copied', 1)}
+							>
+								<a>
+									<Icon type="copy" />
+								</a>
+							</CopyToClipboard>
+						</p>
+						<p>
+							Address
+							<Divider type="vertical" />
+							<Tag>
+								<a
+									target="_blank"
+									href={
+										network &&
+										account &&
+										`https://${network}.etherscan.io/address/${account}`
+									}
+								>
+									{`${account.substring(0, 10)}...`}
+								</a>
+							</Tag>
+							<Divider type="vertical" />
+							<CopyToClipboard
+								text={account}
+								onCopy={() => message.success('Account address copied', 1)}
+							>
+								<a>
+									<Icon type="copy" />
+								</a>
+							</CopyToClipboard>
+						</p>
+					</Col>
+					<Col span={5}>
+						<QRCode value={account} />
+					</Col>
 				</Row>
 			</Card>
-		</Col>
+		</Row>
 		{contractAddress && (
-			<Col span={11} offset={2}>
+			<Row style={{ marginTop: 40 }}>
 				<Card
 					title={
 						<React.Fragment>
@@ -63,33 +100,53 @@ const Info = ({
 							<Divider type="vertical" />Escrow
 						</React.Fragment>
 					}
-					style={{ height: '380px' }}
 				>
 					<Row>
-						<p>
-							Balance
-							<Divider type="vertical" />
-							<Tag>
-								{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
-							</Tag>
-						</p>
-						<p>
-							Address
-							<Divider type="vertical" />
-							<Tag>
-								{/* REFACTOR use button */}
-								<a target="_blank" href={url}>
-									{contractAddress}
-								</a>
-							</Tag>
-						</p>
-						<Divider />
-						<QRCode value={contractAddress} />
+						<Col xs={24} sm={19} md={19} lg={19} xl={19}>
+							<p>
+								Balance
+								<Divider type="vertical" />
+								<Tag>
+									{(Number(escrowBalance) / 100000000).toString() || '0'} AGI
+								</Tag>
+								<Divider type="vertical" />
+								<CopyToClipboard
+									text={Number(escrowBalance) / 100000000}
+									onCopy={() => message.success('Escrow balance copied', 1)}
+								>
+									<a>
+										<Icon type="copy" />
+									</a>
+								</CopyToClipboard>
+							</p>
+							<p>
+								Address
+								<Divider type="vertical" />
+								<Tag>
+									{/* REFACTOR use button */}
+									<a target="_blank" href={url}>
+										{`${contractAddress.substring(0, 10)}...`}
+									</a>
+								</Tag>
+								<Divider type="vertical" />
+								<CopyToClipboard
+									text={contractAddress}
+									onCopy={() => message.success('Escrow address copied', 1)}
+								>
+									<a>
+										<Icon type="copy" />
+									</a>
+								</CopyToClipboard>
+							</p>
+						</Col>
+						<Col span={5}>
+							<QRCode value={contractAddress} />
+						</Col>
 					</Row>
 				</Card>
-			</Col>
+			</Row>
 		)}
-	</Row>
+	</React.Fragment>
 );
 
 export default Info;

@@ -1,5 +1,5 @@
 import { connect } from "react-redux"
-import React, { Component } from "react"
+import { Component } from "react"
 import { setInjected } from "../actions/web3"
 import { watchNetwork, stopWatchingNetwork } from "../helpers"
 

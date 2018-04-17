@@ -34,7 +34,7 @@ const Info = ({
 					<Button
 						size="small"
 						type="primary"
-						href="https://vulpemventures.github.io/faucet-erc20/"
+						href="https://faucet.singularitynet.io"
 						target="_blank"
 					>
 						Get Kovan AGI

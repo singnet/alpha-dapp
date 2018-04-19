@@ -145,7 +145,7 @@ class Job extends React.Component {
       this.props.agent.contractInstance.validateJobInvocation(this.state.jobAddress, v, r, s, {from: this.props.account}).then(validateJob => {
         console.log('job invocation validation returned: ' + validateJob[0]);
 
-        let rpcClient = new JsonRpcClient({endpoint: 'http://10.11.106.9:5000'});
+        let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
 
         rpcClient.request("classify", {
           job_address: this.state.jobAddress,

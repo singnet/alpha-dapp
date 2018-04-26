@@ -208,7 +208,6 @@ class Job extends React.Component {
   }
 
   render() {
-
     return(
 
       <React.Fragment>
@@ -288,40 +287,47 @@ class Job extends React.Component {
 
           <div style={{ marginTop: '20px' }}>
             { this.state.jobStep == 0 &&
-              <p>
-                The first step in calling the Agent's API is to create a Job contract with the Agent. The Job contract stores the negotiated price in AGI tokens for
-                calling the API. The negotiated price is based upon the 'current price' value stored in the Agent contract at the time the Job is created. Once a Job contract
-                is created, tokens can be transferred to the Job to be held in escrow until the Agent has performed the work.
+              <div>
+                <p>
+                  The first step in calling the Agent's API is to create a Job contract with the Agent. The Job contract stores the negotiated price in AGI tokens for
+                  calling the API. The negotiated price is based upon the 'current price' value stored in the Agent contract at the time the Job is created. Once a Job contract
+                  is created, tokens can be transferred to the Job to be held in escrow until the Agent has performed the work.
+                </p>
                 <br/>
                 <br/>
                 <Button type="primary" onClick={this.createJob}>Create Job Contract</Button>
-              </p>
+              </div>
             }
             { this.state.jobStep == 1 &&
-              <p>
-                The second step in calling the Agent's API is to approve the Job contract to transfer AGI tokens on your behalf. The amount of AGI tokens that will be authorized
-                is limited to the agreed upon price of services in the Job contract that was just created.
+              <div>
+                <p>
+                  The second step in calling the Agent's API is to approve the Job contract to transfer AGI tokens on your behalf. The amount of AGI tokens that will be authorized
+                  is limited to the agreed upon price of services in the Job contract that was just created.
+                </p>
                 <br/>
                 <br/>
                 <Button type="primary" onClick={this.approveTokens}>Approve AGI Transfer</Button>
-              </p>
+              </div>
             }
             { this.state.jobStep == 2 &&
-              <p>
-                Now that the token transfer has been approved, the third step is to fund the actual Job contract. This will cause the Job contract to transfer the AGI tokens that
-                were just approved from your balance to the Job contracts address to be held in escrow until the Job is completed by the Agent performing the work.
+              <div>
+                <p>
+                  Now that the token transfer has been approved, the third step is to fund the actual Job contract. This will cause the Job contract to transfer the AGI tokens that
+                  were just approved from your balance to the Job contracts address to be held in escrow until the Job is completed by the Agent performing the work.
+                </p>
                 <br/>
                 <br/>
                 <Button type="primary" onClick={this.fundJob}>Fund Job Contract</Button>
-              </p>
+              </div>
             }
             { this.state.jobStep == 3 &&
-              <p>
-                Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
-                area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
-                will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
-                or transfer any additional funds.
-
+              <div>
+                <p>
+                  Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
+                  area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
+                  will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
+                  or transfer any additional funds.
+                </p>
                 {
                   !this.state.fileUploaded &&
                     <React.Fragment>
@@ -339,16 +345,16 @@ class Job extends React.Component {
                 <br/>
                 <br/>
                 <Button type="primary" onClick={this.callApi} disabled={!this.state.fileUploaded} >Call Agent API</Button>
-              </p>
+              </div>
             }
           </div>
 
           {
             this.state.jobStep == 4 &&
-            <p>
+            <div>
               <Divider orientation="left">Job Results</Divider>
-              <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.jobResult} />
-            </p>
+              <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.jobResult.map((result, i) => Object.assign({}, result, { key: 'result'+i }))} />
+            </div>
           }
 
         </Card>

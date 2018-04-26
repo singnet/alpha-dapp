@@ -41,14 +41,15 @@ class Services extends React.Component {
         title:      '',
         dataIndex:  'state',
         render:     (state, agent, index) =>
-          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={!(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' } onClick={() => this.props.onAgentClick(agent)} >
-            {
-              this.props.account ?
-                state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled' :
-                'Unlock account'
-            }
-          </Button>
-      },
+          typeof this.props.selectedAgent === 'undefined' &&
+            <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={!(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' } onClick={() => this.props.onAgentClick(agent)} >
+              {
+                this.props.account ?
+                  state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled' :
+                  'Unlock account'
+              }
+            </Button>
+        }
     ];
 
     this.watchRegistryTimer = undefined;
@@ -101,17 +102,19 @@ class Services extends React.Component {
         }
 
         Promise.all(promises).then(() => {
-          this.setState({
-            agents: Object.values(agents),
-          })
+          const newAgents = Object.values(agents);
+          if (
+            !this.state.agents.length ||
+            newAgents.some((agent, i) => agent.address != this.state.agents[i].address) 
+          ) {
+            this.setState({ agents: newAgents });
+          }
         });
       });
     }
   }
 
   render() {
-
-    console.log(this.props.account)
 
     return(
       <Card title={

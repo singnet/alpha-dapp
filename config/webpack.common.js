@@ -32,7 +32,7 @@ module.exports = {
             ['es2015', { modules: false }], 'react'
           ],
           plugins: [
-            ['import', { libraryName: "antd", style: true }]
+            ['import', { libraryName: 'antd', libraryDirectory: 'es', style: true }]
           ]
         }
       },

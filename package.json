@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "webpack-dev-server --config ./config/webpack.dev.js --progress --colors --open",
     "build": "webpack --config ./config/webpack.prod.js -p --progress --colors",
-    "build-analyze": "webpack --config ./config/webpack.prod.js -p --profile --json > ./stats.json && webpack-bundle-analyzer ./stats.json",
+    "build-analyze": "webpack --config ./config/webpack.prod-analyze.js -p --progress --colors",
     "serve-dist": "node scripts/serveDist.js"
   },
   "repository": {

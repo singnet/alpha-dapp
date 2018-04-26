@@ -10,6 +10,7 @@ class Services extends React.Component {
 
     this.state = {
       agents : [],
+      account: undefined
     };
 
     this.servicesTableKeys = [
@@ -40,8 +41,12 @@ class Services extends React.Component {
         title:      '',
         dataIndex:  'state',
         render:     (state, agent, index) =>
-          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={!(state == AGENT_STATE.ENABLED)} onClick={() => this.props.onAgentClick(agent)} >
-            {state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled'}
+          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={!(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' } onClick={() => this.props.onAgentClick(agent)} >
+            {
+              this.props.account ?
+                state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled' :
+                'Unlock account'
+            }
           </Button>
       },
     ];
@@ -51,6 +56,14 @@ class Services extends React.Component {
 
   componentWillMount() {
     this.watchRegistryTimer = setInterval(() => this.watchRegistry(), 500);
+  }
+
+  componentWillReceiveProps(nextProps, prevState) {
+    if (prevState.account != nextProps.account) {
+      this.setState({
+        account: nextProps.account
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -97,6 +110,8 @@ class Services extends React.Component {
   }
 
   render() {
+
+    console.log(this.props.account)
 
     return(
       <Card title={

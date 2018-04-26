@@ -123,7 +123,7 @@ class App extends React.Component {
               <Col xs={24} sm={24} md={22} lg={15} xl={18} span={9}>
                 <Account network={this.state.chainId} account={this.state.account} ethBalance={this.state.ethBalance} agiBalance={this.state.agiBalance} />
                 <Divider/>
-                <Services network={this.state.chainId} registry={this.registryInstance} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
+                <Services account={this.state.account} network={this.state.chainId} registry={this.registryInstance} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
                 <Divider/>
                 {
                   this.state.selectedAgent &&

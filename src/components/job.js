@@ -1,6 +1,6 @@
 import React from 'react';
-import AgentDef from 'singularitynet-alpha-blockchain/Agent';
-import JobDef from 'singularitynet-alpha-blockchain/Job';
+import { abi as agentAbi } from 'singularitynet-alpha-blockchain/Agent.json';
+import { abi as jobAbi } from 'singularitynet-alpha-blockchain/Job.json';
 import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 import { NETWORKS, AGENT_STATE, AGI } from '../util';
@@ -29,8 +29,8 @@ class Job extends React.Component {
     this.createJob     = this.createJob.bind(this);
     this.callApi       = this.callApi.bind(this);
 
-    abiDecoder.addABI(AgentDef.abi);
-    abiDecoder.addABI(JobDef.abi);
+    abiDecoder.addABI(agentAbi);
+    abiDecoder.addABI(jobAbi);
   }
 
   createJob() {
@@ -63,7 +63,7 @@ class Job extends React.Component {
             jobStep: prevState.jobStep + 1,
             jobAddress: jobAddress,
             jobPrice: jobPrice,
-            jobInstance: window.ethjs.contract(JobDef.abi).at(jobAddress),
+            jobInstance: window.ethjs.contract(jobAbi).at(jobAddress),
           }));
         }
       });

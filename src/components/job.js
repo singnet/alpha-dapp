@@ -29,9 +29,14 @@ class Job extends React.Component {
     this.approveTokens = this.approveTokens.bind(this);
     this.createJob     = this.createJob.bind(this);
     this.callApi       = this.callApi.bind(this);
+    this.handleReject  = this.handleReject.bind(this);
 
     abiDecoder.addABI(agentAbi);
     abiDecoder.addABI(jobAbi);
+  }
+
+  handleReject() {
+    this.setState({ showModal: !this.state.showModal })
   }
 
   createJob() {
@@ -41,34 +46,38 @@ class Job extends React.Component {
       waitingForMetaMask: true,
     });
 
-    this.props.agent['contractInstance'].createJob({from: this.props.account}).then(response => {
+    this.props.agent['contractInstance'].createJob({from: this.props.account})
+      .then(response => {
+        this.setState({
+          waitingForMetaMask: false,
+        });
 
-      this.setState({
-        waitingForMetaMask: false,
-      });
+        this.waitForTransaction(response).then(receipt => {
 
-      this.waitForTransaction(response).then(receipt => {
+          let decodedLogs = abiDecoder.decodeLogs(receipt.logs);
+          let createdEvent = decodedLogs.find(log => log.name == "JobCreated" && log.address == this.props.agent['contractInstance'].address);
 
-        let decodedLogs = abiDecoder.decodeLogs(receipt.logs);
-        let createdEvent = decodedLogs.find(log => log.name == "JobCreated" && log.address == this.props.agent['contractInstance'].address);
+          if(createdEvent) {
 
-        if(createdEvent) {
+            let jobAddress = createdEvent.events.find(item => item.name == 'job').value;
+            let jobPrice   = createdEvent.events.find(item => item.name == 'jobPrice').value;
 
-          let jobAddress = createdEvent.events.find(item => item.name == 'job').value;
-          let jobPrice   = createdEvent.events.find(item => item.name == 'jobPrice').value;
+            console.log('Job: ' + jobAddress + ' for price: ' + AGI.toDecimal(jobPrice) + ' AGI was created');
 
-          console.log('Job: ' + jobAddress + ' for price: ' + AGI.toDecimal(jobPrice) + ' AGI was created');
-
-          this.setState((prevState) => ({
-            showModal: false,
-            jobStep: prevState.jobStep + 1,
-            jobAddress: jobAddress,
-            jobPrice: jobPrice,
-            jobInstance: window.ethjs.contract(jobAbi).at(jobAddress),
-          }));
-        }
-      });
-    });
+            this.setState((prevState) => ({
+              showModal: false,
+              jobStep: prevState.jobStep + 1,
+              jobAddress: jobAddress,
+              jobPrice: jobPrice,
+              jobInstance: window.ethjs.contract(jobAbi).at(jobAddress),
+            }));
+          }
+        });
+      })
+      .catch(err => {
+        console.log(err)
+        this.handleReject() 
+      })
   }
 
   approveTokens() {
@@ -78,22 +87,26 @@ class Job extends React.Component {
       waitingForMetaMask: true,
     });
 
-    this.props.token.approve(this.state.jobAddress, this.state.jobPrice, {from: this.props.account}).then(response => {
+    this.props.token.approve(this.state.jobAddress, this.state.jobPrice, {from: this.props.account})
+      .then(response => {
+        this.setState({
+          waitingForMetaMask: false,
+        });
 
-      this.setState({
-        waitingForMetaMask: false,
-      });
+        this.waitForTransaction(response).then(receipt => {
+          console.log('ECR20 approve called with ' + AGI.toDecimal(this.state.jobPrice) + ' AGI for Job: ' + this.state.jobAddress);
 
-      this.waitForTransaction(response).then(receipt => {
-        console.log('ECR20 approve called with ' + AGI.toDecimal(this.state.jobPrice) + ' AGI for Job: ' + this.state.jobAddress);
+          this.setState((prevState) => ({
+            showModal: false,
+            jobStep: prevState.jobStep + 1,
+          }));
 
-        this.setState((prevState) => ({
-          showModal: false,
-          jobStep: prevState.jobStep + 1,
-        }));
-
-      });
-    });
+        });
+      })
+      .catch(err => {
+        console.log(err)
+        this.handleReject() 
+      })
   }
 
   fundJob() {
@@ -103,22 +116,26 @@ class Job extends React.Component {
       waitingForMetaMask: true,
     });
 
-    this.state.jobInstance.fundJob({from: this.props.account}).then(response => {
+    this.state.jobInstance.fundJob({from: this.props.account})
+      .then(response => {
+        this.setState({
+          waitingForMetaMask: false,
+        });
 
-      this.setState({
-        waitingForMetaMask: false,
-      });
+        this.waitForTransaction(response).then(receipt => {
+          console.log('FundJob called on Job: ' + this.state.jobAddress);
 
-      this.waitForTransaction(response).then(receipt => {
-        console.log('FundJob called on Job: ' + this.state.jobAddress);
+          this.setState((prevState) => ({
+            showModal: false,
+            jobStep: prevState.jobStep + 1,
+          }));
 
-        this.setState((prevState) => ({
-          showModal: false,
-          jobStep: prevState.jobStep + 1,
-        }));
-
-      });
-    });
+        });
+      })
+      .catch(err => {
+        console.log(err)
+        this.handleReject() 
+      })
   }
 
   callApi() {

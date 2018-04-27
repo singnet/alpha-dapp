@@ -59,8 +59,8 @@ class Services extends React.Component {
     this.watchRegistryTimer = setInterval(() => this.watchRegistry(), 500);
   }
 
-  componentWillReceiveProps(nextProps, prevState) {
-    if (prevState.account != nextProps.account) {
+  componentWillReceiveProps(nextProps) {
+    if (this.props.account != nextProps.account) {
       this.setState({
         account: nextProps.account
       });

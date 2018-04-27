@@ -2,7 +2,7 @@ import React from 'react';
 import { abi as agentAbi } from 'singularitynet-alpha-blockchain/Agent.json';
 import { abi as jobAbi } from 'singularitynet-alpha-blockchain/Job.json';
 import Eth from 'ethjs';
-import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
+import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload, notification} from 'antd';
 import { NETWORKS, AGENT_STATE, AGI } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
 import abiDecoder from 'abi-decoder';
@@ -18,6 +18,7 @@ class Job extends React.Component {
       jobStep:                0,
       jobResult:              undefined,
       showModal:              false,
+      showError:              false,
       waitingForMetaMask:     false,
       file:                   undefined,
       fileUploaded:           false,
@@ -208,13 +209,29 @@ class Job extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.online === false) {
+    if ((this.props.online && !nextProps.online) || this.props.account && !nextProps.account) {
       this.setState({ showModal: false })
+      if (!this.state.showError) {
+        notification.error({
+          message: 'Connection lost',
+          description: 'Connection was lost while handling your request; please try again when connection is restored',
+          duration: 0,
+          key: 'errorNotification'
+        });
+        this.setState({ showError: true });
+      }
+    } else if (
+      !this.props.online && this.props.account && nextProps.online ||
+      this.props.online && !this.props.account && nextProps.account ||
+      !this.props.account && !this.props.online && nextProps.online && nextProps.account
+    ) {
+      notification.close('errorNotification');
+      this.setState({ showError: false });
     }
   }
 
   render() {
-    if (this.props.online) {
+    if (this.props.online && this.props.account) {
       return(
         <React.Fragment>
           {
@@ -367,9 +384,7 @@ class Job extends React.Component {
         </React.Fragment>
       );
     } else {
-      return(
-        <p>u r offline dude</p>
-      )
+      return (<p></p>)
     }
   }
 }

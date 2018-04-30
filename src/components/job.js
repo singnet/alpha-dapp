@@ -209,39 +209,22 @@ class Job extends React.Component {
 
   render() {
 
-    let blockchainModal = () => {
-      return (
-        <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
-          <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
-            <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-            <Steps.Step title='Blockchain' icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-          </Steps>
-          <br/>
-          {
-            this.state.waitingForMetaMask ?
-              <Alert description="Waiting for interaction with MetaMask to complete." />
-              : <Alert description="Waiting for transaction to be mined on the blockchain." />
-          }
-        </Modal>
-      )
-    };
-
-    let serviceModal = () => {
-      return (
-        <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
-          <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
-            <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-            <Steps.Step title='Service' icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-          </Steps>
-          <br/>
-          {
-            this.state.waitingForMetaMask ?
-              <Alert description="Waiting for interaction with MetaMask to complete." />
-              : <Alert description="Waiting for API call result." />
-          }
-        </Modal>
-      )
-    };
+    let modal = type => 
+      <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
+        <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
+          <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
+          <Steps.Step title={type[0].toUpperCase().concat(type.slice(1))} icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
+        </Steps>
+        <br/>
+        {
+          this.state.waitingForMetaMask ?
+            <Alert description="Waiting for interaction with MetaMask to complete." />
+            : <Alert description={'Waiting for ' + (type === 'blockchain' ? 'transaction to be mined on the blockchain.' : 'API response')} />
+        }
+      </Modal>
+    
+    let blockchainModal = () => modal('blockchain')
+    let serviceModal = () => modal('service')
 
     let steps = [
       {

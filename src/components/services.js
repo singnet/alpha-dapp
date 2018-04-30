@@ -17,10 +17,12 @@ class Services extends React.Component {
       {
         title:      'Agent',
         dataIndex:  'name',
+        width:      250,
       },
       {
         title:      'Contract Address',
         dataIndex:  'address',
+        width:      300,
         render:     (address, agent, index) =>
           this.props.network &&
           <Tag>
@@ -46,7 +48,7 @@ class Services extends React.Component {
             { this.getAgentButtonText(state, agent) }
           </Button>
         }
-    ];
+    ].map(column => Object.assign({}, { width: 150 }, column));
 
     this.watchRegistryTimer = undefined;
   }
@@ -125,7 +127,7 @@ class Services extends React.Component {
           <Divider type="vertical"/>
           Agents
         </React.Fragment> }>
-          <Table columns={this.servicesTableKeys} pagination={false} dataSource={this.state.agents} />
+          <Table className="services-table" scroll={{ x: true }} columns={this.servicesTableKeys} pagination={false} dataSource={this.state.agents} />
       </Card>
     )
   }

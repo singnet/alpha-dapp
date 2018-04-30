@@ -161,6 +161,7 @@ class Job extends React.Component {
               title: item,
               dataIndex: item,
               key: item,
+              width: 150,
             }
           });
 

@@ -165,6 +165,7 @@ class Job extends React.Component {
           });
 
           let jobResult = {};
+
           Object.keys(rpcResponse).forEach(item => {
             jobResult[item] = rpcResponse[item].toString();
           });
@@ -286,30 +287,30 @@ class Job extends React.Component {
       {
         title: 'Call API',
         render: () => {
-          return(<p>
+          return(<div><p>
               Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
               area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
               will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
-              or transfer any additional funds.
+              or transfer any additional funds.</p>
 
               {
-                  !this.state.fileUploaded &&
-                  <React.Fragment>
-                      <br/>
-                      <br/>
-                      <Upload.Dragger name="file" beforeUpload={(file)=>{ this.processFile(file); return false; }} >
-                          <p className="ant-upload-drag-icon">
-                              <Icon type="inbox" />
-                          </p>
-                          <p className="ant-upload-text">Click for file-chooser dialog or drag a file to this area to be analyzed.</p>
-                      </Upload.Dragger>
-                  </React.Fragment>
-              }
+                !this.state.fileUploaded &&
+                <React.Fragment>
+                    <br/>
+                    <br/>
+                    <Upload.Dragger name="file" beforeUpload={(file)=>{ this.processFile(file); return false; }} >
+                        <p className="ant-upload-drag-icon">
+                            <Icon type="inbox" />
+                        </p>
+                        <p className="ant-upload-text">Click for file-chooser dialog or drag a file to this area to be analyzed.</p>
+                    </Upload.Dragger>
+                </React.Fragment>
+            }
 
-              <br/>
-              <br/>
-              <Button type="primary" onClick={() => {this.showModal(serviceModal); this.callApi()}} disabled={!this.state.fileUploaded} >Call Agent API</Button>
-          </p>)
+            <br/>
+            <br/>
+            <Button type="primary" onClick={() => {this.showModal(serviceModal); this.callApi()}} disabled={!this.state.fileUploaded} >Call Agent API</Button>
+          </div>)
         },
       },
     ];

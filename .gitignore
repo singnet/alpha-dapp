@@ -3,4 +3,3 @@
 /.idea
 dist/bundle.*
 dist/index.html
-config/awsConfig.json

@@ -1,5 +1,6 @@
-const { region, Bucket } = require("./../config/awsConfig.json")
 const { outPath } = require("./../config/paths.js")
+
+const [ ,, Bucket, region ] = process.argv
 
 const { createReadStream, readdirSync } = require("fs")
 const { join, relative } = require("path")
@@ -16,6 +17,7 @@ const getFilePath = file =>
 readdir(outPath)
   .then(files => Promise.all(files.map(Key => {
     const fileRelativePath = getFilePath(Key)
+    console.log(fileRelativePath)
     return s3.upload({
         Bucket,
         "Key": fileRelativePath,
@@ -27,22 +29,3 @@ readdir(outPath)
   })))
   .then(() => { console.log(`Files uploaded successfully`) })
   .catch(error => { console.log(error) }) 
-
-/*
-readdir(outPath)
-  .then(files => Promise.all(files.map(Key =>
-    {
-      console.log(Key)
-      return s3.upload({
-          Bucket,
-          Key,
-          "ContentType": mime.lookup(Key),
-          "Body": createReadStream(Key),
-          "CacheControl": Key === "index.html" ? "no-cache, no-store, must-revalidate" : "public, max-age=31536000",
-          ...(Key.startsWith("bundle") ? { "ContentEncoding": "gzip" } : {})
-      }).promise()
-    }
-  )))
-  .then(() => { console.log(`Files uploaded successfully`) })
-  .catch(error => { console.log(error) }) 
-*/

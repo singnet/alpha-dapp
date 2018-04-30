@@ -7,7 +7,7 @@
     "build": "webpack --config ./config/webpack.prod.js -p --progress --colors",
     "build-analyze": "webpack --config ./config/webpack.prod-analyze.js -p --progress --colors",
     "serve-dist": "node scripts/serveDist.js",
-    "deploy": "node scripts/deploy.js"
+    "deploy": "node scripts/deploy.js alpha.singularitynet.io us-east-1"
   },
   "repository": {
     "type": "git",

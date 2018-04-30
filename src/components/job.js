@@ -44,8 +44,9 @@ class Job extends React.Component {
 
   showModal(modalFunctional) {
     this.setState({
-       showModal: true,
-       modalFunctional: modalFunctional,
+      waitingForMetaMask: true,
+      showModal: true,
+      modalFunctional: modalFunctional,
     });
   }
 
@@ -208,37 +209,37 @@ class Job extends React.Component {
   render() {
 
     let blockchainModal = () => {
-        return (
-            <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
-                <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
-                    <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-                    <Steps.Step title='Blockchain' icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-                </Steps>
-                <br/>
-                {
-                    this.state.waitingForMetaMask ?
-                        <Alert description="Waiting for interaction with MetaMask to complete." />
-                        : <Alert description="Waiting for transaction to be mined on the blockchain." />
-                }
-            </Modal>
-        )
+      return (
+        <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
+          <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
+            <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
+            <Steps.Step title='Blockchain' icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
+          </Steps>
+          <br/>
+          {
+            this.state.waitingForMetaMask ?
+              <Alert description="Waiting for interaction with MetaMask to complete." />
+              : <Alert description="Waiting for transaction to be mined on the blockchain." />
+          }
+        </Modal>
+      )
     };
 
     let serviceModal = () => {
-        return (
-            <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
-                <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
-                    <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-                    <Steps.Step title='Blockchain' icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-                </Steps>
-                <br/>
-                {
-                    this.state.waitingForMetaMask ?
-                        <Alert description="Waiting for interaction with MetaMask to complete." />
-                        : <Alert description="Waiting for transaction to be mined on the blockchain." />
-                }
-            </Modal>
-        )
+      return (
+        <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
+          <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
+            <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
+            <Steps.Step title='Service' icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
+          </Steps>
+          <br/>
+          {
+            this.state.waitingForMetaMask ?
+              <Alert description="Waiting for interaction with MetaMask to complete." />
+              : <Alert description="Waiting for API call result." />
+          }
+        </Modal>
+      )
     };
 
     let steps = [
@@ -317,19 +318,7 @@ class Job extends React.Component {
 
       <React.Fragment>
         {
-        this.state.showModal &&
-          <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
-            <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
-              <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-              <Steps.Step title='Blockchain' icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-            </Steps>
-            <br/>
-            {
-              this.state.waitingForMetaMask ?
-                <Alert description="Waiting for interaction with MetaMask to complete." />
-                : <Alert description="Waiting for transaction to be mined on the blockchain." />
-            }
-          </Modal>
+          this.state.showModal && this.state.modalFunctional()
         }
 
         <Card title={
@@ -393,10 +382,10 @@ class Job extends React.Component {
 
           {
             this.state.jobStep == 4 &&
-            <p>
+            <div>
               <Divider orientation="left">Job Results</Divider>
               <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.jobResult} />
-            </p>
+            </div>
           }
 
         </Card>

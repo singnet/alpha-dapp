@@ -10,6 +10,7 @@ class Services extends React.Component {
 
     this.state = {
       agents : [],
+      selectedAgent: undefined,
     };
 
     this.servicesTableKeys = [
@@ -21,6 +22,7 @@ class Services extends React.Component {
         title:      'Contract Address',
         dataIndex:  'address',
         render:     (address, agent, index) =>
+          this.props.network &&
           <Tag>
             <a target="_blank" href={`${NETWORKS[this.props.network].etherscan}/address/${address}`}>
               {address}
@@ -40,13 +42,25 @@ class Services extends React.Component {
         title:      '',
         dataIndex:  'state',
         render:     (state, agent, index) =>
-          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={!(state == AGENT_STATE.ENABLED)} onClick={() => this.props.onAgentClick(agent)} >
-            {state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled'}
+          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={ !(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' || typeof this.state.selectedAgent !== 'undefined' } onClick={() => { this.setState({ selectedAgent: agent }); return this.props.onAgentClick(agent); }} >
+            { this.getAgentButtonText(state, agent) }
           </Button>
-      },
+        }
     ];
 
     this.watchRegistryTimer = undefined;
+  }
+
+  getAgentButtonText(state, agent) {
+    if (this.props.account) {
+      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.address !== agent.address) {
+        return state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled';
+      } else {
+        return 'Selected';
+      }
+    } else {
+      return 'Unlock account';
+    }
   }
 
   componentWillMount() {
@@ -88,9 +102,15 @@ class Services extends React.Component {
         }
 
         Promise.all(promises).then(() => {
-          this.setState({
-            agents: Object.values(agents),
-          })
+          if (this.props.network) {
+            this.setState({
+              agents: Object.values(agents)
+            });
+          } else {
+            this.setState({
+              agents: []
+            })
+          }
         });
       });
     }

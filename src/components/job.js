@@ -1,6 +1,6 @@
 import React from 'react';
-import AgentDef from 'singularitynet-alpha-blockchain/Agent';
-import JobDef from 'singularitynet-alpha-blockchain/Job';
+import { abi as agentAbi } from 'singularitynet-alpha-blockchain/Agent.json';
+import { abi as jobAbi } from 'singularitynet-alpha-blockchain/Job.json';
 import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 import { NETWORKS, AGENT_STATE, AGI } from '../util';
@@ -18,6 +18,7 @@ class Job extends React.Component {
       jobStep:                0,
       jobResult:              undefined,
       showModal:              false,
+      modalFunctional:        undefined,
       waitingForMetaMask:     false,
       file:                   undefined,
       fileUploaded:           false,
@@ -28,17 +29,40 @@ class Job extends React.Component {
     this.approveTokens = this.approveTokens.bind(this);
     this.createJob     = this.createJob.bind(this);
     this.callApi       = this.callApi.bind(this);
+    this.handleReject  = this.handleReject.bind(this);
 
-    abiDecoder.addABI(AgentDef.abi);
-    abiDecoder.addABI(JobDef.abi);
+    abiDecoder.addABI(agentAbi);
+    abiDecoder.addABI(jobAbi);
+  }
+
+  nextJobStep() {
+    this.clearModal();
+    this.setState((prevState) => ({
+      jobStep: prevState.jobStep + 1
+    }));
+  }
+
+  showModal(modalFunctional) {
+    this.setState({
+      waitingForMetaMask: true,
+      showModal: true,
+      modalFunctional: modalFunctional,
+    });
+  }
+
+  clearModal() {
+    this.setState({
+       showModal: false,
+    });
+  }
+
+  handleReject(error) {
+    console.log('User rejected transaction');
+    console.log(error);
+    this.clearModal();
   }
 
   createJob() {
-
-    this.setState({
-      showModal: true,
-      waitingForMetaMask: true,
-    });
 
     this.props.agent['contractInstance'].createJob({from: this.props.account}).then(response => {
 
@@ -59,23 +83,18 @@ class Job extends React.Component {
           console.log('Job: ' + jobAddress + ' for price: ' + AGI.toDecimal(jobPrice) + ' AGI was created');
 
           this.setState((prevState) => ({
-            showModal: false,
-            jobStep: prevState.jobStep + 1,
             jobAddress: jobAddress,
             jobPrice: jobPrice,
-            jobInstance: window.ethjs.contract(JobDef.abi).at(jobAddress),
+            jobInstance: window.ethjs.contract(jobAbi).at(jobAddress),
           }));
+
+          this.nextJobStep();
         }
       });
-    });
+    }).catch(this.handleReject);
   }
 
   approveTokens() {
-
-    this.setState({
-      showModal: true,
-      waitingForMetaMask: true,
-    });
 
     this.props.token.approve(this.state.jobAddress, this.state.jobPrice, {from: this.props.account}).then(response => {
 
@@ -85,22 +104,12 @@ class Job extends React.Component {
 
       this.waitForTransaction(response).then(receipt => {
         console.log('ECR20 approve called with ' + AGI.toDecimal(this.state.jobPrice) + ' AGI for Job: ' + this.state.jobAddress);
-
-        this.setState((prevState) => ({
-          showModal: false,
-          jobStep: prevState.jobStep + 1,
-        }));
-
+        this.nextJobStep();
       });
-    });
+    }).catch(this.handleReject);
   }
 
   fundJob() {
-
-    this.setState({
-      showModal: true,
-      waitingForMetaMask: true,
-    });
 
     this.state.jobInstance.fundJob({from: this.props.account}).then(response => {
 
@@ -110,22 +119,12 @@ class Job extends React.Component {
 
       this.waitForTransaction(response).then(receipt => {
         console.log('FundJob called on Job: ' + this.state.jobAddress);
-
-        this.setState((prevState) => ({
-          showModal: false,
-          jobStep: prevState.jobStep + 1,
-        }));
-
+        this.nextJobStep()
       });
-    });
+    }).catch(this.handleReject);
   }
 
   callApi() {
-
-    this.setState({
-      showModal: true,
-      waitingForMetaMask: true,
-    });
 
     var addressBytes = [];
     for(var i=2; i< this.state.jobAddress.length-1; i+=2) {
@@ -166,23 +165,24 @@ class Job extends React.Component {
           });
 
           let jobResult = {};
+
           Object.keys(rpcResponse).forEach(item => {
             jobResult[item] = rpcResponse[item].toString();
           });
 
           this.setState((prevState) => ({
-            showModal: false,
-            jobStep: prevState.jobStep + 1,
             jobKeys: jobKeys,
             jobResult: [jobResult],
           }));
+
+          this.nextJobStep();
 
         }).catch(rpcError => {
           console.log(rpcError);
         });
 
       });
-    });
+    }).catch(this.handleReject);
   }
 
   async waitForTransaction(hash) {
@@ -209,23 +209,100 @@ class Job extends React.Component {
 
   render() {
 
+    let modal = type => 
+      <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
+        <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
+          <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
+          <Steps.Step title={type[0].toUpperCase().concat(type.slice(1))} icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
+        </Steps>
+        <br/>
+        {
+          this.state.waitingForMetaMask ?
+            <Alert description="Waiting for interaction with MetaMask to complete." />
+            : <Alert description={'Waiting for ' + (type === 'blockchain' ? 'transaction to be mined on the blockchain.' : 'API response')} />
+        }
+      </Modal>
+    
+    let blockchainModal = () => modal('blockchain')
+    let serviceModal = () => modal('service')
+
+    let steps = [
+      {
+        title: 'Create Job',
+        render: () => {
+          return(
+            <p>
+              The first step in calling the Agent's API is to create a Job contract with the Agent. The Job contract stores the negotiated price in AGI tokens for
+              calling the API. The negotiated price is based upon the 'current price' value stored in the Agent contract at the time the Job is created. Once a Job contract
+              is created, tokens can be transferred to the Job to be held in escrow until the Agent has performed the work.
+              <br/>
+              <br/>
+              <Button type="primary" onClick={() => {this.showModal(blockchainModal); this.createJob()}}>Create Job Contract</Button>
+            </p>)
+        }
+      },
+      {
+        title: 'Approve Transfer',
+        render: () => {
+          return(
+            <p>
+              The second step in calling the Agent's API is to approve the Job contract to transfer AGI tokens on your behalf. The amount of AGI tokens that will be authorized
+              is limited to the agreed upon price of services in the Job contract that was just created.
+              <br/>
+              <br/>
+              <Button type="primary" onClick={() => {this.showModal(blockchainModal); this.approveTokens()}}>Approve AGI Transfer</Button>
+            </p>)
+          }
+      },
+      {
+        title: 'Fund Job',
+        render: () => {
+          return(
+            <p>
+                Now that the token transfer has been approved, the third step is to fund the actual Job contract. This will cause the Job contract to transfer the AGI tokens that
+                were just approved from your balance to the Job contracts address to be held in escrow until the Job is completed by the Agent performing the work.
+                <br/>
+                <br/>
+                <Button type="primary" onClick={() => {this.showModal(blockchainModal); this.fundJob()}}>Fund Job Contract</Button>
+            </p>)
+        },
+      },
+      {
+        title: 'Call API',
+        render: () => {
+          return(<div><p>
+              Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
+              area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
+              will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
+              or transfer any additional funds.</p>
+
+              {
+                !this.state.fileUploaded &&
+                <React.Fragment>
+                    <br/>
+                    <br/>
+                    <Upload.Dragger name="file" beforeUpload={(file)=>{ this.processFile(file); return false; }} >
+                        <p className="ant-upload-drag-icon">
+                            <Icon type="inbox" />
+                        </p>
+                        <p className="ant-upload-text">Click for file-chooser dialog or drag a file to this area to be analyzed.</p>
+                    </Upload.Dragger>
+                </React.Fragment>
+            }
+
+            <br/>
+            <br/>
+            <Button type="primary" onClick={() => {this.showModal(serviceModal); this.callApi()}} disabled={!this.state.fileUploaded} >Call Agent API</Button>
+          </div>)
+        },
+      },
+    ];
+
     return(
 
       <React.Fragment>
         {
-        this.state.showModal &&
-          <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
-            <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>
-              <Steps.Step title='MetaMask' icon={this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-              <Steps.Step title='Blockchain' icon={!this.state.waitingForMetaMask ? <Icon type="loading" /> : null} />
-            </Steps>
-            <br/>
-            {
-              this.state.waitingForMetaMask ?
-                <Alert description="Waiting for interaction with MetaMask to complete." />
-                : <Alert description="Waiting for transaction to be mined on the blockchain." />
-            }
-          </Modal>
+          this.state.showModal && this.state.modalFunctional()
         }
 
         <Card title={
@@ -273,82 +350,26 @@ class Job extends React.Component {
           <br/>
 
           {
-            this.state.jobStep < 4 &&
+            this.state.jobStep < steps.length &&
               <React.Fragment>
                 <Divider orientation="left">Job Progress</Divider>
 
                 <Steps size="small" progressDot current={this.state.jobStep} >
-                  <Steps.Step title='Create Job' />
-                  <Steps.Step title='Approve Transfer' />
-                  <Steps.Step title='Fund Job' />
-                  <Steps.Step title='Call API' />
+                  {steps.map((step, i) => {return <Steps.Step title={step.title} key={`${i}-${step.title}`} /> })}
                 </Steps>
+
+                <div style={{ marginTop: '20px' }}>
+                  {steps[this.state.jobStep].render()}
+                </div>
               </React.Fragment>
           }
 
-          <div style={{ marginTop: '20px' }}>
-            { this.state.jobStep == 0 &&
-              <p>
-                The first step in calling the Agent's API is to create a Job contract with the Agent. The Job contract stores the negotiated price in AGI tokens for
-                calling the API. The negotiated price is based upon the 'current price' value stored in the Agent contract at the time the Job is created. Once a Job contract
-                is created, tokens can be transferred to the Job to be held in escrow until the Agent has performed the work.
-                <br/>
-                <br/>
-                <Button type="primary" onClick={this.createJob}>Create Job Contract</Button>
-              </p>
-            }
-            { this.state.jobStep == 1 &&
-              <p>
-                The second step in calling the Agent's API is to approve the Job contract to transfer AGI tokens on your behalf. The amount of AGI tokens that will be authorized
-                is limited to the agreed upon price of services in the Job contract that was just created.
-                <br/>
-                <br/>
-                <Button type="primary" onClick={this.approveTokens}>Approve AGI Transfer</Button>
-              </p>
-            }
-            { this.state.jobStep == 2 &&
-              <p>
-                Now that the token transfer has been approved, the third step is to fund the actual Job contract. This will cause the Job contract to transfer the AGI tokens that
-                were just approved from your balance to the Job contracts address to be held in escrow until the Job is completed by the Agent performing the work.
-                <br/>
-                <br/>
-                <Button type="primary" onClick={this.fundJob}>Fund Job Contract</Button>
-              </p>
-            }
-            { this.state.jobStep == 3 &&
-              <p>
-                Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
-                area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
-                will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
-                or transfer any additional funds.
-
-                {
-                  !this.state.fileUploaded &&
-                    <React.Fragment>
-                      <br/>
-                      <br/>
-                      <Upload.Dragger name="file" beforeUpload={(file)=>{ this.processFile(file); return false; }} >
-                      <p className="ant-upload-drag-icon">
-                        <Icon type="inbox" />
-                      </p>
-                      <p className="ant-upload-text">Click for file-chooser dialog or drag a file to this area to be analyzed.</p>
-                      </Upload.Dragger>
-                    </React.Fragment>
-                }
-
-                <br/>
-                <br/>
-                <Button type="primary" onClick={this.callApi} disabled={!this.state.fileUploaded} >Call Agent API</Button>
-              </p>
-            }
-          </div>
-
           {
             this.state.jobStep == 4 &&
-            <p>
+            <div>
               <Divider orientation="left">Job Results</Divider>
               <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.jobResult} />
-            </p>
+            </div>
           }
 
         </Card>

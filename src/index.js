@@ -20,8 +20,7 @@ class App extends React.Component {
       ethBalance:     0,
       agiBalance:     0,
       chainId:        undefined,
-      selectedAgent:  undefined,
-      online:         true
+      selectedAgent:  undefined
     };
 
     this.web3               = undefined;
@@ -59,60 +58,53 @@ class App extends React.Component {
   }
 
   watchWallet() {
-    this.eth.accounts()
-      .then(accounts => {
-        if(accounts.length === 0) {
-          console.log('wallet is locked');
-          this.setState({account: undefined});
-          return;
-        } else if(accounts[0] !== this.state.account) {
-          console.log('account: ' + accounts[0] + ' unlocked');
-          this.setState({ account: accounts[0] });
-        }
+    this.eth.accounts().then(accounts => {
 
-        this.eth.getBalance(accounts[0]).then(response => {
-          let balance = Number(response.toString());
-          if(balance !== this.state.ethBalance) {
-            console.log('account eth balance is: ' + Eth.fromWei(balance, 'ether'));
-            this.setState({ethBalance: balance});
+      if(accounts.length === 0) {
+        console.log('wallet is locked');
+        this.setState({account: undefined});
+        return;
+      } else if(accounts[0] !== this.state.account) {
+        console.log('account: ' + accounts[0] + ' unlocked');
+        this.setState({ account: accounts[0] });
+      }
+
+      this.eth.getBalance(accounts[0]).then(response => {
+        let balance = Number(response.toString());
+        if(balance !== this.state.ethBalance) {
+          console.log('account eth balance is: ' + Eth.fromWei(balance, 'ether'));
+          this.setState({ethBalance: balance});
+        }
+      })
+
+      if(this.tokenInstance) {
+        this.tokenInstance.balanceOf(this.state.account).then(response => {
+          let balance = Number(response['balance']);
+          if(balance !== this.state.agiBalance) {
+            console.log('account agi balance is: ' + AGI.toDecimal(balance));
+            this.setState({agiBalance: balance})
           }
         })
-
-        if(this.tokenInstance) {
-          this.tokenInstance.balanceOf(this.state.account).then(response => {
-            let balance = Number(response['balance']);
-            if(balance !== this.state.agiBalance) {
-              console.log('account agi balance is: ' + AGI.toDecimal(balance));
-              this.setState({agiBalance: balance})
-            }
-          })
-        } else {
-          this.setState({agiBalance: 0})
-        }
-      })
-      .catch(err => {
-        console.log(err)
-      })
+      } else {
+        this.setState({agiBalance: 0})
+      }
+    }).catch(err => { console.log(err) });
   }
 
   watchNetwork() {
-    this.eth.net_version()
-      .then(chainId => {
-        if (this.state.online === false) {
-          this.setState({ online: true });
-        }
-        if (this.state.chainId !== chainId && chainId !== undefined) {
-          console.log("connected to network: " + NETWORKS[chainId].name);
-          this.setState({chainId: chainId});
+    this.eth.net_version().then(chainId => {
 
-          this.registryInstance = (chainId in registryNetworks) ? this.eth.contract(registryAbi).at(registryNetworks[chainId].address) : undefined;
-          this.tokenInstance    = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;
-        }
-      })
-      .catch(err => {
-        console.log(err)
-        this.setState({ online: false });
-      })
+      if (this.state.chainId !== chainId && chainId !== undefined) {
+        console.log("connected to network: " + NETWORKS[chainId].name);
+        this.setState({chainId: chainId});
+
+        this.registryInstance = (chainId in registryNetworks) ? this.eth.contract(registryAbi).at(registryNetworks[chainId].address) : undefined;
+        this.tokenInstance    = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;
+      }
+    }).catch(err => {
+      console.log(err)
+      this.setState({ chainId: undefined });
+    });
   }
 
   hireAgent(agent) {
@@ -135,11 +127,11 @@ class App extends React.Component {
               <Col xs={24} sm={24} md={22} lg={15} xl={18} span={9}>
                 <Account network={this.state.chainId} account={this.state.account} ethBalance={this.state.ethBalance} agiBalance={this.state.agiBalance} />
                 <Divider/>
-                <Services account={this.state.account} network={this.state.chainId} registry={this.registryInstance} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} selectedAgent={this.state.selectedAgent} />
+                <Services account={this.state.account} network={this.state.chainId} registry={this.registryInstance} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
                 <Divider/>
                 {
-                  this.state.selectedAgent &&
-                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} token={this.tokenInstance} online={this.state.online} />
+                  this.state.selectedAgent && this.state.chainId && this.state.account &&
+                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} token={this.tokenInstance} />
                 }
               </Col>
             </Row>

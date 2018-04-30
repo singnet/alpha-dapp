@@ -10,7 +10,7 @@ class Services extends React.Component {
 
     this.state = {
       agents : [],
-      account: undefined
+      selectedAgent: undefined,
     };
 
     this.servicesTableKeys = [
@@ -22,6 +22,7 @@ class Services extends React.Component {
         title:      'Contract Address',
         dataIndex:  'address',
         render:     (address, agent, index) =>
+          this.props.network &&
           <Tag>
             <a target="_blank" href={`${NETWORKS[this.props.network].etherscan}/address/${address}`}>
               {address}
@@ -41,30 +42,29 @@ class Services extends React.Component {
         title:      '',
         dataIndex:  'state',
         render:     (state, agent, index) =>
-          typeof this.props.selectedAgent === 'undefined' &&
-            <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={!(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' } onClick={() => this.props.onAgentClick(agent)} >
-              {
-                this.props.account ?
-                  state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled' :
-                  'Unlock account'
-              }
-            </Button>
+          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={ !(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' || typeof this.state.selectedAgent !== 'undefined' } onClick={() => { this.setState({ selectedAgent: agent }); return this.props.onAgentClick(agent); }} >
+            { this.getAgentButtonText(state, agent) }
+          </Button>
         }
     ];
 
     this.watchRegistryTimer = undefined;
   }
 
-  componentWillMount() {
-    this.watchRegistryTimer = setInterval(() => this.watchRegistry(), 500);
+  getAgentButtonText(state, agent) {
+    if (this.props.account) {
+      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.address !== agent.address) {
+        return state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled';
+      } else {
+        return 'Selected';
+      }
+    } else {
+      return 'Unlock account';
+    }
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.account != nextProps.account) {
-      this.setState({
-        account: nextProps.account
-      });
-    }
+  componentWillMount() {
+    this.watchRegistryTimer = setInterval(() => this.watchRegistry(), 500);
   }
 
   componentWillUnmount() {
@@ -102,12 +102,14 @@ class Services extends React.Component {
         }
 
         Promise.all(promises).then(() => {
-          const newAgents = Object.values(agents);
-          if (
-            !this.state.agents.length ||
-            newAgents.some((agent, i) => agent.address != this.state.agents[i].address) 
-          ) {
-            this.setState({ agents: newAgents });
+          if (this.props.network) {
+            this.setState({
+              agents: Object.values(agents)
+            });
+          } else {
+            this.setState({
+              agents: []
+            })
           }
         });
       });

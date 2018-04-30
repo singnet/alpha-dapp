@@ -3,21 +3,20 @@ var webpack = require('webpack');
 
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 
-var srcPath = path.join(__dirname, '..', 'src');
-var outPath = path.join(__dirname, '..', 'dist');
+var paths = require('./paths.js')
 
 module.exports = {
 
-  entry: path.join(srcPath, 'index.js'),
+  entry: path.join(paths.srcPath, 'index.js'),
 
   output: {
-    path: outPath,
+    path: paths.outPath,
     filename: 'bundle.[chunkhash:8].js'
   },
 
   devtool: 'source-map',
   devServer: {
-    contentBase: outPath,
+    contentBase: paths.outPath,
   },
 
   module: {
@@ -25,7 +24,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: srcPath,
+        include: paths.srcPath,
         exclude: /node_modules/,
         options: {
           presets: [
@@ -62,7 +61,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       inject: true,
-      template: path.join(srcPath, 'index.html'),
+      template: path.join(paths.srcPath, 'index.html'),
       minify: {
         removeComments: true,
         collapseWhitespace: true,

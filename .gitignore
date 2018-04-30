@@ -3,4 +3,4 @@
 /.idea
 dist/bundle.*
 dist/index.html
-stats.json
+config/awsConfig.json

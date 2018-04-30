@@ -6,7 +6,8 @@
     "serve": "webpack-dev-server --config ./config/webpack.dev.js --progress --colors --open",
     "build": "webpack --config ./config/webpack.prod.js -p --progress --colors",
     "build-analyze": "webpack --config ./config/webpack.prod-analyze.js -p --progress --colors",
-    "serve-dist": "node scripts/serveDist.js"
+    "serve-dist": "node scripts/serveDist.js",
+    "deploy": "node scripts/deploy.js"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,7 @@
     "styled-components": "^3.2.5"
   },
   "devDependencies": {
+    "aws-sdk": "^2.229.1",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
     "babel-plugin-import": "^1.7.0",
@@ -45,6 +47,7 @@
     "less": "^3.0.1",
     "less-loader": "^4.1.0",
     "react-hot-loader": "^4.0.1",
+    "recursive-readdir": "^2.2.2",
     "style-loader": "^0.20.3",
     "uglifyjs-webpack-plugin": "^1.2.5",
     "webpack": "^4.5.0",

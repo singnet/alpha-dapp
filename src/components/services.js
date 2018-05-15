@@ -17,10 +17,12 @@ class Services extends React.Component {
       {
         title:      'Agent',
         dataIndex:  'name',
+        width:      200,
       },
       {
         title:      'Contract Address',
         dataIndex:  'address',
+        width:      300,
         render:     (address, agent, index) =>
           this.props.network &&
           <Tag>
@@ -46,7 +48,7 @@ class Services extends React.Component {
             { this.getAgentButtonText(state, agent) }
           </Button>
         }
-    ];
+    ].map(column => Object.assign({}, { width: 150 }, column));
 
     this.watchRegistryTimer = undefined;
   }
@@ -85,6 +87,9 @@ class Services extends React.Component {
         });
 
         let promises = [];
+        
+        promises.push(fetch('/featured.json').then(response => response.json()))
+
         for(let agent in agents) {
           let agentInstance = this.props.agentContract.at(agents[agent].address);
           agents[agent]['contractInstance'] = agentInstance;
@@ -101,11 +106,25 @@ class Services extends React.Component {
           });
         }
 
-        Promise.all(promises).then(() => {
+        Promise.all(promises).then(([featured]) => {
           if (this.props.network) {
+            let otherAgents = []
             this.setState({
-              agents: Object.values(agents)
-            });
+              agents: Object.assign(
+                {},
+                {
+                  featured: Object.values(agents).filter(agent => {
+                    const test = featured.includes(agent.address)
+                    if (test) {
+                      return test
+                    } else {
+                      otherAgents.push(agent)
+                    }
+                  }),
+                  other: otherAgents
+                }
+              )
+            })
           } else {
             this.setState({
               agents: []
@@ -118,14 +137,46 @@ class Services extends React.Component {
 
   render() {
 
+    let servicesTable = (columns, dataSource, featured) =>
+      <React.Fragment>
+        {/* featured ? <h5><Icon type="star" /> Featured</h5> : <h5>Other</h5> */}
+        <Table className="services-table" scroll={{ x: true }} columns={columns} pagination={dataSource.length > 10} dataSource={dataSource} />
+        <br/>
+      </React.Fragment>
+    
+    /* All services go in one table for now
+    let featuredServices = () => servicesTable(this.servicesTableKeys, this.state.agents.featured, true)
+    let otherServices = () => servicesTable(this.servicesTableKeys, this.state.agents.other)
+    */
+    // TODO: destroy the allServices table once we go live with the Featured agents distinction
+    let allServicesList = () =>
+      Object.values(this.state.agents).reduce((acc, cur) =>
+        cur.length !== 0 ? acc.concat(cur) : acc, [])
+
+    let allServicesTable = () => servicesTable(this.servicesTableKeys, allServicesList())
+
     return(
       <Card title={
         <React.Fragment>
           <Icon type="table" />
           <Divider type="vertical"/>
-          Agents
+            Agents
         </React.Fragment> }>
-          <Table columns={this.servicesTableKeys} pagination={false} dataSource={this.state.agents} />
+        {/* TODO: Destroy the allServices table rendering once we go live with the Featured agents distinction, restore the two tables */} 
+        {
+          this.state.agents
+          && (
+            (this.state.agents.featured && this.state.agents.featured.length !== 0)
+            || (this.state.agents.other && this.state.agents.other.length !== 0)
+          )
+          && allServicesTable()
+        }
+        {
+          /*
+          {this.state.agents.featured && this.state.agents.featured.length !== 0 && featuredServices()}
+          {this.state.agents.other && this.state.agents.other.length !== 0 && otherServices()}
+          */
+        }
       </Card>
     )
   }

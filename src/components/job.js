@@ -161,6 +161,7 @@ class Job extends React.Component {
               title: item,
               dataIndex: item,
               key: item,
+              width: 150,
             }
           });
 
@@ -281,7 +282,7 @@ class Job extends React.Component {
                 <React.Fragment>
                     <br/>
                     <br/>
-                    <Upload.Dragger name="file" beforeUpload={(file)=>{ this.processFile(file); return false; }} >
+                    <Upload.Dragger name="file" accept=".jpg,.jpeg,.png" beforeUpload={(file)=>{ this.processFile(file); return false; }} >
                         <p className="ant-upload-drag-icon">
                             <Icon type="inbox" />
                         </p>

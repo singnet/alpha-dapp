@@ -1,5 +1,6 @@
 import React from 'react';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
+import { debounce } from 'underscore'
 
 
 class DefaultService extends React.Component {
@@ -9,6 +10,10 @@ class DefaultService extends React.Component {
 
     this.title = 'Call API';
     this.submitAction       = this.submitAction.bind(this);
+    
+    this.updateValid = this.updateValid.bind(this);
+    this.updateValid = debounce(this.updateValid, 500);
+    
     this.state = {
         methodName: "test",
         paramString: "{}",
@@ -25,28 +30,29 @@ class DefaultService extends React.Component {
         return true;
     }
   }
+
+  updateValid() {
+    let inputValid = true;
+    
+    try {
+        JSON.parse(this.state.paramString);
+    } catch(e) {
+        inputValid = false;
+    }
+    
+    if (this.state.methodName.length == 0)
+        inputValid = false;
+        
+    this.setState({
+        inputValid: inputValid
+    });
+  }
   
   handleChange(type, e) {
-    
-    let inputValid = true;
-
-    if (type === "paramString")
-    {
-        try {
-            JSON.parse(e.target.value);
-        } catch(e) {
-            inputValid = false;
-        }
-    }
-    else if (type === "methodName")
-    {
-        if (e.target.value.length == 0)
-            inputValid = false;
-    }
     this.setState({
         [type]: e.target.value,
-        inputValid: inputValid
-    })
+    });
+    this.updateValid();
   }
 
   submitAction() {
@@ -59,13 +65,7 @@ class DefaultService extends React.Component {
   renderForm() {
     return(
         <React.Fragment>
-        <div><p>
-            Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
-            area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
-            will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
-            or transfer any additional funds.
-        </p>
-
+        <div>
         <label>
           Method name:
           <input type="text" value={this.state.methodName} onChange={ this.handleChange.bind(this, 'methodName') } />

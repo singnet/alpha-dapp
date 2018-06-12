@@ -32,3 +32,23 @@ export class AGI {
     return agi / 100000000;
   }
 }
+
+export class FORMAT_UTILS {
+  /**
+   * Shortens a long ethereum address to a human-friendly abbreviated one. Assumes the address starts with '0x'.
+   *
+   * An address like 0x2ed982c220fed6c9374e63804670fc16bd481b8f provides no more value to a human than
+   * a shortened version like 0x2ed9...1b8f. However, screen real estate is precious, especially to real users
+   * and not developers with high-res monitors.
+   */
+  static toHumanFriendlyAddressPreview(address) {
+    const addressPrefix = '0x';
+    const previewLength = 4;
+
+    const addressToShorten = address.startsWith(addressPrefix) ? address.substring(addressPrefix.length) : address;
+    const previewPrefix    = addressToShorten.substring(0, previewLength);
+    const previewSuffix    = addressToShorten.substring(addressToShorten.length - previewLength);
+
+    return `0x${previewPrefix}...${previewSuffix}`;
+  }
+}

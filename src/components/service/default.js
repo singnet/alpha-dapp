@@ -2,7 +2,7 @@ import React from 'react';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 
 
-class DefaultCall extends React.Component {
+class DefaultService extends React.Component {
 
   constructor(props) {
     super(props);
@@ -10,9 +10,9 @@ class DefaultCall extends React.Component {
     this.title = 'Call API';
     this.submitAction       = this.submitAction.bind(this);
     this.state = {
-        fileUploaded: false,
-        file: undefined,
-        fileReader: undefined,
+        methodName: "test",
+        paramString: "{}",
+        inputValid: true
     };
   }
 
@@ -26,62 +26,34 @@ class DefaultCall extends React.Component {
     }
   }
   
-  processFile(file) {
-    let reader = new FileReader();
+  handleChange(type, e) {
+    
+    let inputValid = true;
 
-    reader.onload = (e => {
-      this.setState({
-        fileUploaded: true,
-        file: file,
-        fileReader: reader,
-      });
-    });
-
-    reader.readAsDataURL(file);
+    if (type === "paramString")
+    {
+        try {
+            a = JSON.parse(e.target.value);
+        } catch(e) {
+            inputValid = false;
+        }
+    }
+    else if (type === "methodName")
+    {
+        if (e.target.value.length == 0)
+            inputValid = false;
+    }
+    this.setState({
+        [type]: e.target.value,
+        inputValid: inputValid
+    })
   }
 
   submitAction() {
     this.props.showModalCallback(this.props.callModal);
-    this.props.callApiCallback('classify', 
-      {
-        image: this.state.fileReader.result.split(',')[1],
-        image_type: this.state.file.type.split('/')[1],
-      }
+    this.props.callApiCallback(this.state.methodName, 
+      JSON.parse(this.state.paramString)
     );
-  }
-
-  componentWillReceiveProps(nextProps) {
-    console.log("Receiving props: ", nextProps)
-    this.parseResult(nextProps);
-  }
-
-  parseResult(nextProps)
-  {
-    if (nextProps.jobResult === undefined)
-        return;
-    
-    let rpcResponse = nextProps.jobResult;
-
-    let jobKeys = Object.keys(rpcResponse).map(item => {
-        return {
-          title: item,
-          dataIndex: item,
-          key: item,
-          width: 150,
-        }
-      });
-
-      let predictions = {};
-
-
-      Object.keys(rpcResponse).forEach(item => {
-        predictions[item] = rpcResponse[item].toString();
-      });
-
-      this.setState((prevState) => ({
-        jobKeys: jobKeys,
-        predictions: [predictions],
-      }));
   }
 
   renderForm() {
@@ -94,30 +66,18 @@ class DefaultCall extends React.Component {
             or transfer any additional funds.
         </p>
 
-        {
-            !this.state.fileUploaded &&
-            <React.Fragment>
-                <br/>
-                <br/>
-                <Upload.Dragger name="file" accept=".jpg,.jpeg,.png" beforeUpload={(file)=>{ this.processFile(file); return false; }} >
-                    <p className="ant-upload-drag-icon">
-                        <Icon type="inbox" />
-                    </p>
-                    <p className="ant-upload-text">Click for file-chooser dialog or drag a file to this area to be analyzed.</p>
-                </Upload.Dragger>
-            </React.Fragment>
-        }
-        <table><tbody>
-            <tr>
-                <td><b>File:</b></td>
-                <td>{this.state.file ? `${this.state.file.name}` : '(not uploaded)'}</td>
-        </tr>
-        </tbody>
-        </table>
-
+        <label>
+          Method name:
+          <input type="text" value={this.state.methodName} onChange={ this.handleChange.bind(this, 'methodName') } />
+        </label>
         <br/>
+        <label>
+          Params (as JSON):
+          <textarea onChange={ this.handleChange.bind(this, 'paramString')} value={this.state.paramString} />
+        </label>
+            
         <br/>
-        <Button type="primary" onClick={() => {this.submitAction(); }} disabled={!this.state.fileUploaded} >Call Agent API</Button>
+        <Button type="primary" onClick={() => {this.submitAction(); }} disabled={!this.state.inputValid} >Call Agent API</Button>
         </div>
         </React.Fragment>
         )
@@ -127,7 +87,8 @@ class DefaultCall extends React.Component {
     return(<div><p>Complete</p>
         <div>
           <Divider orientation="left">Job Results</Divider>
-          <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.predictions} />
+          <textarea rows="4" cols="50" readonly value={() => {JSON.stringify(this.props.jobResult)}}/>
+          
         </div>
     </div>);
   }
@@ -139,4 +100,4 @@ class DefaultCall extends React.Component {
   }
 }
 
-export default DefaultCall;
+export default DefaultService;

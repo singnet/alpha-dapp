@@ -9,8 +9,9 @@ import Account from './components/account';
 import Services from './components/services';
 import Job from './components/job';
 import { NETWORKS, AGI } from './util';
-import FaceDetect from './components/service/face_detect';
-import DefaultCall from './components/service/default';
+import FaceDetectService from './components/service/face_detect';
+import DefaultService from './components/service/default';
+import AlphaExampleService from './components/service/alpha_example';
 
 class App extends React.Component {
 
@@ -27,9 +28,10 @@ class App extends React.Component {
     };
 
     this.serviceNameToComponent = {
-      'face_detect': FaceDetect,
+      'Alpha TensorFlow Agent': AlphaExampleService,
+      //'face_detect': FaceDetectService,
     };
-    this.serviceDefaultComponent = DefaultCall;
+    this.serviceDefaultComponent = DefaultService;
     
 
     this.web3               = undefined;

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 
-class FaceDetect extends React.Component {
+class FaceDetectService extends React.Component {
 
   constructor(props) {
     super(props);
@@ -23,4 +23,4 @@ class FaceDetect extends React.Component {
   }
 }
 
-export default FaceDetect;
+export default FaceDetectService;

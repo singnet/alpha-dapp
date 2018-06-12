@@ -33,7 +33,7 @@ class DefaultService extends React.Component {
     if (type === "paramString")
     {
         try {
-            a = JSON.parse(e.target.value);
+            JSON.parse(e.target.value);
         } catch(e) {
             inputValid = false;
         }
@@ -84,10 +84,11 @@ class DefaultService extends React.Component {
   }
   
   renderComplete() {
+    let jsonResult = JSON.stringify(this.props.jobResult);
     return(<div><p>Complete</p>
         <div>
           <Divider orientation="left">Job Results</Divider>
-          <textarea rows="4" cols="50" readonly value={() => {JSON.stringify(this.props.jobResult)}}/>
+          <textarea rows="4" cols="50" readOnly value={jsonResult}/>
           
         </div>
     </div>);

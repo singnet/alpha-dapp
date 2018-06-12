@@ -87,13 +87,7 @@ class AlphaExampleService extends React.Component {
   renderForm() {
     return(
         <React.Fragment>
-        <div><p>
-            Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
-            area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
-            will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
-            or transfer any additional funds.
-        </p>
-
+        <div>
         {
             !this.state.fileUploaded &&
             <React.Fragment>

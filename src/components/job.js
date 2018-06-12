@@ -231,6 +231,20 @@ class Job extends React.Component {
                 <Button type="primary" onClick={() => {this.showModal(blockchainModal); this.fundJob()}}>Fund Job Contract</Button>
             </p>)
         },
+      },
+      {
+        
+        title: 'Call API',
+        render: () => {
+          return(
+            <p>
+            Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
+            area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
+            will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
+            or transfer any additional funds.
+            </p>
+            )
+        }
       }
     ];
     const CallComponent = this.props.callComponent;
@@ -297,7 +311,7 @@ class Job extends React.Component {
               </React.Fragment>
           }
           {
-            this.state.jobStep >= steps.length &&
+            this.state.jobStep >= (steps.length - 1) &&
             <React.Fragment>
             <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
             </React.Fragment>

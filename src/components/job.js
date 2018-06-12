@@ -23,8 +23,6 @@ class Job extends React.Component {
       waitingForMetaMask:     false,
     };
 
-    this.props.agent.name
-
     this.fundJob       = this.fundJob.bind(this);
     this.approveTokens = this.approveTokens.bind(this);
     this.createJob     = this.createJob.bind(this);
@@ -125,7 +123,7 @@ class Job extends React.Component {
     }).catch(this.handleReject);
   }
 
-  callApi(callState) {
+  callApi(methodName, params) {
 
     var addressBytes = [];
     for(var i=2; i< this.state.jobAddress.length-1; i+=2) {
@@ -147,35 +145,13 @@ class Job extends React.Component {
 
         let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
 
-        rpcClient.request("classify", {
-          job_address: this.state.jobAddress,
-          job_signature: signature,
-
-          image: callState.fileReader.result.split(',')[1],
-          image_type: callState.file.type.split('/')[1],
-        }).then(rpcResponse => {
+        params['job_address'] = this.state.jobAddress;
+        params['job_signature'] = signature;
+        rpcClient.request(methodName, params).then(rpcResponse => {
 
           console.log(rpcResponse);
-
-          let jobKeys = Object.keys(rpcResponse).map(item => {
-            return {
-              title: item,
-              dataIndex: item,
-              key: item,
-              width: 150,
-            }
-          });
-
-          let jobResult = {};
-
-
-          Object.keys(rpcResponse).forEach(item => {
-            jobResult[item] = rpcResponse[item].toString();
-          });
-
           this.setState((prevState) => ({
-            jobKeys: jobKeys,
-            jobResult: [jobResult],
+            jobResult: rpcResponse,
           }));
 
           this.nextJobStep();
@@ -321,9 +297,9 @@ class Job extends React.Component {
               </React.Fragment>
           }
           {
-            this.state.jobStep == steps.length &&
+            this.state.jobStep >= steps.length &&
             <React.Fragment>
-            <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobKeys={this.state.jobKeys} jobResult={this.state.jobResult}/>
+            <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
             </React.Fragment>
           }
 

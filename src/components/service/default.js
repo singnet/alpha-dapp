@@ -8,6 +8,7 @@ class DefaultCall extends React.Component {
     super(props);
 
     this.title = 'Call API';
+    this.submitAction       = this.submitAction.bind(this);
     this.state = {
         fileUploaded: false,
         file: undefined,
@@ -39,17 +40,52 @@ class DefaultCall extends React.Component {
     reader.readAsDataURL(file);
   }
 
-  render() {
-    if (this.isComplete())
-        return(<div><p>Complete</p>
-            <div>
-              <Divider orientation="left">Job Results</Divider>
-              <Table pagination={false} columns={this.props.jobKeys} dataSource={this.props.jobResult} />
-            </div>
-        </div>);
-    else
-    {
-      return(
+  submitAction() {
+    this.props.showModalCallback(this.props.callModal);
+    this.props.callApiCallback('classify', 
+      {
+        image: this.state.fileReader.result.split(',')[1],
+        image_type: this.state.file.type.split('/')[1],
+      }
+    );
+  }
+
+  componentWillReceiveProps(nextProps) {
+    console.log("Receiving props: ", nextProps)
+    this.parseResult(nextProps);
+  }
+
+  parseResult(nextProps)
+  {
+    if (nextProps.jobResult === undefined)
+        return;
+    
+    let rpcResponse = nextProps.jobResult;
+
+    let jobKeys = Object.keys(rpcResponse).map(item => {
+        return {
+          title: item,
+          dataIndex: item,
+          key: item,
+          width: 150,
+        }
+      });
+
+      let predictions = {};
+
+
+      Object.keys(rpcResponse).forEach(item => {
+        predictions[item] = rpcResponse[item].toString();
+      });
+
+      this.setState((prevState) => ({
+        jobKeys: jobKeys,
+        predictions: [predictions],
+      }));
+  }
+
+  renderForm() {
+    return(
         <React.Fragment>
         <div><p>
             Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
@@ -81,11 +117,25 @@ class DefaultCall extends React.Component {
 
         <br/>
         <br/>
-        <Button type="primary" onClick={() => {this.props.showModalCallback(this.props.callModal); this.props.callApiCallback(this.state)}} disabled={!this.state.fileUploaded} >Call Agent API</Button>
+        <Button type="primary" onClick={() => {this.submitAction(); }} disabled={!this.state.fileUploaded} >Call Agent API</Button>
         </div>
         </React.Fragment>
         )
-    }
+  }
+  
+  renderComplete() {
+    return(<div><p>Complete</p>
+        <div>
+          <Divider orientation="left">Job Results</Divider>
+          <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.predictions} />
+        </div>
+    </div>);
+  }
+  render() {
+    if (this.isComplete())
+        return this.renderComplete();
+    else
+        return this.renderForm();
   }
 }
 

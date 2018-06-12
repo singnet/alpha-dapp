@@ -7,6 +7,7 @@ import { NETWORKS, AGENT_STATE, AGI } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
 import abiDecoder from 'abi-decoder';
 
+
 class Job extends React.Component {
 
   constructor(props) {
@@ -20,16 +21,16 @@ class Job extends React.Component {
       showModal:              false,
       modalFunctional:        undefined,
       waitingForMetaMask:     false,
-      file:                   undefined,
-      fileUploaded:           false,
-      fileReader:             undefined,
     };
+
+    this.props.agent.name
 
     this.fundJob       = this.fundJob.bind(this);
     this.approveTokens = this.approveTokens.bind(this);
     this.createJob     = this.createJob.bind(this);
     this.callApi       = this.callApi.bind(this);
     this.handleReject  = this.handleReject.bind(this);
+    this.showModal     = this.showModal.bind(this);
 
     abiDecoder.addABI(agentAbi);
     abiDecoder.addABI(jobAbi);
@@ -124,7 +125,7 @@ class Job extends React.Component {
     }).catch(this.handleReject);
   }
 
-  callApi() {
+  callApi(callState) {
 
     var addressBytes = [];
     for(var i=2; i< this.state.jobAddress.length-1; i+=2) {
@@ -150,8 +151,8 @@ class Job extends React.Component {
           job_address: this.state.jobAddress,
           job_signature: signature,
 
-          image: this.state.fileReader.result.split(',')[1],
-          image_type: this.state.file.type.split('/')[1],
+          image: callState.fileReader.result.split(',')[1],
+          image_type: callState.file.type.split('/')[1],
         }).then(rpcResponse => {
 
           console.log(rpcResponse);
@@ -166,6 +167,7 @@ class Job extends React.Component {
           });
 
           let jobResult = {};
+
 
           Object.keys(rpcResponse).forEach(item => {
             jobResult[item] = rpcResponse[item].toString();
@@ -192,20 +194,6 @@ class Job extends React.Component {
       receipt = await window.ethjs.getTransactionReceipt(hash);
     }
     return receipt;
-  }
-
-  processFile(file) {
-    let reader = new FileReader();
-
-    reader.onload = (e => {
-      this.setState({
-        fileUploaded: true,
-        file: file,
-        fileReader: reader,
-      });
-    });
-
-    reader.readAsDataURL(file);
   }
 
   render() {
@@ -267,38 +255,9 @@ class Job extends React.Component {
                 <Button type="primary" onClick={() => {this.showModal(blockchainModal); this.fundJob()}}>Fund Job Contract</Button>
             </p>)
         },
-      },
-      {
-        title: 'Call API',
-        render: () => {
-          return(<div><p>
-              Now that the Job contract has been funded you are able to call the API on the Agent. Select a file to be analyzed by dragging and dropping the file onto the upload
-              area or by clicking the upload area to initiate the file-chooser dialog. Once you have chosen a file to analyze, click the "Call Agent API" button to initate the API call. This
-              will prompt one further interaction with MetaMask to sign your API request before submitting the request to the Agent. This interaction does not initiate a transaction
-              or transfer any additional funds.</p>
-
-              {
-                !this.state.fileUploaded &&
-                <React.Fragment>
-                    <br/>
-                    <br/>
-                    <Upload.Dragger name="file" accept=".jpg,.jpeg,.png" beforeUpload={(file)=>{ this.processFile(file); return false; }} >
-                        <p className="ant-upload-drag-icon">
-                            <Icon type="inbox" />
-                        </p>
-                        <p className="ant-upload-text">Click for file-chooser dialog or drag a file to this area to be analyzed.</p>
-                    </Upload.Dragger>
-                </React.Fragment>
-            }
-
-            <br/>
-            <br/>
-            <Button type="primary" onClick={() => {this.showModal(serviceModal); this.callApi()}} disabled={!this.state.fileUploaded} >Call Agent API</Button>
-          </div>)
-        },
-      },
+      }
     ];
-
+    const CallComponent = this.props.callComponent;
     return(
 
       <React.Fragment>
@@ -342,10 +301,7 @@ class Job extends React.Component {
                 <td><b>Job Price:</b></td>
                 <td>{this.state.jobPrice ? `${AGI.toDecimal(this.state.jobPrice)} AGI` : '(not created)'}</td>
               </tr>
-              <tr>
-                <td><b>File:</b></td>
-                <td>{this.state.file ? `${this.state.file.name}` : '(not uploaded)'}</td>
-              </tr>
+              
             </tbody>
           </table>
           <br/>
@@ -364,13 +320,11 @@ class Job extends React.Component {
                 </div>
               </React.Fragment>
           }
-
           {
-            this.state.jobStep == 4 &&
-            <div>
-              <Divider orientation="left">Job Results</Divider>
-              <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.jobResult} />
-            </div>
+            this.state.jobStep == steps.length &&
+            <React.Fragment>
+            <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobKeys={this.state.jobKeys} jobResult={this.state.jobResult}/>
+            </React.Fragment>
           }
 
         </Card>

@@ -9,6 +9,8 @@ import Account from './components/account';
 import Services from './components/services';
 import Job from './components/job';
 import { NETWORKS, AGI } from './util';
+import FaceDetect from './components/service/face_detect';
+import DefaultCall from './components/service/default';
 
 class App extends React.Component {
 
@@ -20,8 +22,15 @@ class App extends React.Component {
       ethBalance:     0,
       agiBalance:     0,
       chainId:        undefined,
-      selectedAgent:  undefined
+      selectedAgent:  undefined,
+      agentCallComponent: undefined,
     };
+
+    this.serviceNameToComponent = {
+      'face_detect': FaceDetect,
+    };
+    this.serviceDefaultComponent = DefaultCall;
+    
 
     this.web3               = undefined;
     this.eth                = undefined;
@@ -109,8 +118,10 @@ class App extends React.Component {
 
   hireAgent(agent) {
     console.log("Agent " + agent.name + " selected");
+    
     this.setState({
-      selectedAgent: agent
+      selectedAgent: agent,
+      serviceCallComponent: this.serviceNameToComponent[agent.trimName] || this.serviceDefaultComponent,
     });
   }
 
@@ -131,7 +142,7 @@ class App extends React.Component {
                 <Divider/>
                 {
                   this.state.selectedAgent && this.state.chainId && this.state.account &&
-                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} token={this.tokenInstance} />
+                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
                 }
               </Col>
             </Row>

@@ -15,7 +15,7 @@ class FaceLandmarksService extends React.Component {
         fileUploaded: false,
         file: undefined,
         fileReader: undefined,
-        methodName: "get_landmarks",
+        methodName: "get_landmarks",  
         facesString: '[{"x":10,"y":10,"w":100,"h":100}]',
         landmarkModel: "68",
         inputValid: true,
@@ -94,9 +94,19 @@ class FaceLandmarksService extends React.Component {
     );
   }
 
-  renderBoundingBox(result)
+  drawX(ctx, x, y) {
+    let size = 3;
+    
+    ctx.moveTo(x - size, y - size);
+    ctx.lineTo(x + size, y + size);
+    ctx.stroke();
+
+    ctx.moveTo(x + size, y - size);
+    ctx.lineTo(x - size, y + size);
+}
+
+  renderLandmarks(result)
   {
-    // {"faces": [{"x": 511, "y": 170, "w": 283, "h": 312}, {"x": 61, "y": 252, "w": 236, "h": 259}]}
     let img = this.refs.sourceImg;
     let cnvs = this.refs.bboxCanvas;
     let outsideWrap = this.refs.outsideWrap;
@@ -112,10 +122,12 @@ class FaceLandmarksService extends React.Component {
     cnvs.height = img.naturalHeight;
   
     let ctx = cnvs.getContext("2d");
-    result["faces"].forEach((item) => {
+    result["landmarks"].forEach((item) => {
       ctx.beginPath();
-      ctx.rect(item["x"],item["y"],item["w"],item["h"]);
-      ctx.lineWidth = 3;
+      item["points"].forEach((p) => {
+        this.drawX(ctx, p['x'], p['y']);
+      })
+      ctx.lineWidth = 1;
       ctx.strokeStyle = '#00ff00';
       ctx.stroke();
     });
@@ -124,7 +136,7 @@ class FaceLandmarksService extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.jobResult !== prevProps.jobResult) {
-      //this.renderBoundingBox(this.props.jobResult);
+      this.renderLandmarks(this.props.jobResult);
     }
   }
 

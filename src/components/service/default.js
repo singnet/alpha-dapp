@@ -1,6 +1,6 @@
 import React from 'react';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
-import { debounce } from 'underscore'
+import { debounce } from 'underscore';
 
 
 class DefaultService extends React.Component {
@@ -24,7 +24,6 @@ class DefaultService extends React.Component {
         return false;
     else
     {
-        console.log(this.props.jobResult);
         return true;
     }
   }

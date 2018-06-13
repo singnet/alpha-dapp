@@ -1,17 +1,24 @@
 import React from 'react';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
+import { debounce } from 'underscore';
 
-class FaceDetectService extends React.Component {
+class FaceLandmarksService extends React.Component {
 
   constructor(props) {
     super(props);
 
     this.submitAction = this.submitAction.bind(this);
+    this.updateValid = this.updateValid.bind(this);
+    this.updateValid = debounce(this.updateValid, 500);
+
     this.state = {
         fileUploaded: false,
         file: undefined,
         fileReader: undefined,
-        methodName: "find_face",
+        methodName: "get_landmarks",
+        facesString: '[{"x":10,"y":10,"w":100,"h":100}]',
+        landmarkModel: "68",
+        inputValid: true,
     };
   }
 
@@ -23,6 +30,42 @@ class FaceDetectService extends React.Component {
         console.log(this.props.jobResult);
         return true;
     }
+  }
+
+  updateValid() {
+    let inputValid = true;
+    
+    try {
+        let faces = JSON.parse(this.state.facesString);
+        faces.forEach((item) => {
+          let expectedKeys = ['x', 'y', 'w', 'h'];
+          expectedKeys.forEach((k) => {
+            if (!(k in item)) inputValid = false;
+          });
+        });
+    } catch(e) {
+        inputValid = false;
+    }
+    
+    if (this.state.methodName.length == 0)
+        inputValid = false;
+        
+    if (this.state.landmarkModel !== "68" && this.state.landmarkModel !== "5")
+        inputValid = false;
+
+    if (!this.state.fileUploaded)
+        inputValid = false;
+
+    this.setState({
+        inputValid: inputValid
+    });
+  }
+  
+  handleChange(type, e) {
+    this.setState({
+        [type]: e.target.value,
+    });
+    this.updateValid();
   }
   
   processFile(file) {
@@ -37,6 +80,7 @@ class FaceDetectService extends React.Component {
     });
 
     reader.readAsDataURL(file);
+    this.updateValid();
   }
 
   submitAction() {
@@ -44,6 +88,8 @@ class FaceDetectService extends React.Component {
     this.props.callApiCallback(this.state.methodName, 
       {
         image: this.state.fileReader.result.split(',')[1],
+        face_bboxes: JSON.parse(this.state.facesString),
+        landmark_model: this.state.landmarkModel,
       }
     );
   }
@@ -78,7 +124,7 @@ class FaceDetectService extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.jobResult !== prevProps.jobResult) {
-      this.renderBoundingBox(this.props.jobResult);
+      //this.renderBoundingBox(this.props.jobResult);
     }
   }
 
@@ -99,6 +145,17 @@ class FaceDetectService extends React.Component {
                 </Upload.Dragger>
             </React.Fragment>
         }
+        <div>
+        <label>
+          Landmark model:
+          <input type="text" value={this.state.landmarkModel} onChange={ this.handleChange.bind(this, 'landmarkModel') } />
+        </label>
+        <br/>
+        <label>
+          Faces JSON (you can get this from face detect):
+          <textarea onChange={ this.handleChange.bind(this, 'facesString')} value={this.state.facesString} />
+        </label>
+        </div>
         <table><tbody>
             <tr>
                 <td><b>File:</b></td>
@@ -115,7 +172,7 @@ class FaceDetectService extends React.Component {
         }
         <br/>
         <br/>
-        <Button type="primary" onClick={() => {this.submitAction(); }} disabled={!this.state.fileUploaded} >Call Agent API</Button>
+        <Button type="primary" onClick={() => {this.submitAction(); }} disabled={!this.state.inputValid} >Call Agent API</Button>
         </div>
         </React.Fragment>
         )
@@ -146,4 +203,4 @@ class FaceDetectService extends React.Component {
   }
 }
 
-export default FaceDetectService;
+export default FaceLandmarksService;

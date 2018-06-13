@@ -9,9 +9,14 @@ import Account from './components/account';
 import Services from './components/services';
 import Job from './components/job';
 import { NETWORKS, AGI } from './util';
-import FaceDetectService from './components/service/face_detect';
+
 import DefaultService from './components/service/default';
 import AlphaExampleService from './components/service/alpha_example';
+import FaceDetectService from './components/service/face_detect';
+import FaceLandmarksService from './components/service/face_landmarks';
+import FaceAlignmentService from './components/service/face_alignment';
+import FaceRecognitionService from './components/service/face_recognition';
+
 
 class App extends React.Component {
 
@@ -30,6 +35,9 @@ class App extends React.Component {
     this.serviceNameToComponent = {
       'Alpha TensorFlow Agent': AlphaExampleService,
       'face_detect': FaceDetectService,
+      'face_landmarks': FaceLandmarksService,
+      'face_alignment': FaceAlignmentService,
+      'face_recognition': FaceRecognitionService,
     };
     this.serviceDefaultComponent = DefaultService;
     

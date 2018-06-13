@@ -68,9 +68,9 @@ class DefaultService extends React.Component {
           <input type="text" value={this.state.methodName} onChange={ this.handleChange.bind(this, 'methodName') } />
         </label>
         <br/>
-        <label>
+        <label style={{width:"100%"}}>
           Params (as JSON):
-          <textarea onChange={ this.handleChange.bind(this, 'paramString')} value={this.state.paramString} />
+          <textarea style={{width:"100%"}} onChange={ this.handleChange.bind(this, 'paramString')} value={this.state.paramString} />
         </label>
             
         <br/>
@@ -84,7 +84,7 @@ class DefaultService extends React.Component {
     let jsonResult = JSON.stringify(this.props.jobResult);
     return(<div>
           <Divider orientation="left">Job Results</Divider>
-          <textarea rows="4" cols="50" readOnly value={jsonResult}/>
+          <textarea style={{width:"100%"}} rows="4" readOnly value={jsonResult}/>
     </div>);
   }
   render() {

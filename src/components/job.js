@@ -34,6 +34,10 @@ class Job extends React.Component {
     abiDecoder.addABI(jobAbi);
   }
 
+  componentDidMount() {
+    this.jobDomNode.scrollIntoView();
+  }
+
   nextJobStep() {
     this.clearModal();
     this.setState((prevState) => ({
@@ -276,7 +280,8 @@ class Job extends React.Component {
           </React.Fragment> }>
 
           <Divider orientation="left">Job Details</Divider>
-          <table>
+
+          <table ref={jobDomNode => this.jobDomNode = jobDomNode}>
             <tbody>
               <tr>
                 <td width="120px"><b>Agent:</b></td>

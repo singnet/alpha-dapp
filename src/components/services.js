@@ -1,7 +1,7 @@
 import React from 'react';
 import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table} from 'antd';
-import {NETWORKS, AGENT_STATE, AGI} from '../util';
+import {NETWORKS, AGENT_STATE, AGI, FORMAT_UTILS} from '../util';
 
 
 class Services extends React.Component {
@@ -23,12 +23,12 @@ class Services extends React.Component {
       {
         title:      'Contract Address',
         dataIndex:  'address',
-        width:      300,
+        width:      '20ch',
         render:     (address, agent, index) =>
           this.props.network &&
           <Tag>
             <a target="_blank" href={`${NETWORKS[this.props.network].etherscan}/address/${address}`}>
-              {address}
+              {FORMAT_UTILS.toHumanFriendlyAddressPreview(address)}
             </a>
           </Tag>
       },
@@ -40,6 +40,7 @@ class Services extends React.Component {
       {
         title:      'Agent Endpoint',
         dataIndex:  'endpoint',
+        width: '23ch'
       },
       {
         title:      '',

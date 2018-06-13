@@ -8,9 +8,7 @@ class DefaultService extends React.Component {
   constructor(props) {
     super(props);
 
-    this.title = 'Call API';
-    this.submitAction       = this.submitAction.bind(this);
-    
+    this.submitAction = this.submitAction.bind(this);
     this.updateValid = this.updateValid.bind(this);
     this.updateValid = debounce(this.updateValid, 500);
     
@@ -85,12 +83,9 @@ class DefaultService extends React.Component {
   
   renderComplete() {
     let jsonResult = JSON.stringify(this.props.jobResult);
-    return(<div><p>Complete</p>
-        <div>
+    return(<div>
           <Divider orientation="left">Job Results</Divider>
           <textarea rows="4" cols="50" readOnly value={jsonResult}/>
-          
-        </div>
     </div>);
   }
   render() {

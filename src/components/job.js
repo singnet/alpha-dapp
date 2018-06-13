@@ -171,7 +171,7 @@ class Job extends React.Component {
     }
     return receipt;
   }
-
+  
   render() {
 
     let modal = type => 
@@ -245,6 +245,17 @@ class Job extends React.Component {
             </p>
             )
         }
+      },
+      {
+        
+        title: 'Done',
+        render: () => {
+          return(
+            <p>
+            Your request has been completed.
+            </p>
+            )
+        }
       }
     ];
     const CallComponent = this.props.callComponent;
@@ -264,7 +275,6 @@ class Job extends React.Component {
           </React.Fragment> }>
 
           <Divider orientation="left">Job Details</Divider>
-
           <table>
             <tbody>
               <tr>
@@ -311,7 +321,8 @@ class Job extends React.Component {
               </React.Fragment>
           }
           {
-            this.state.jobStep >= (steps.length - 1) &&
+            // Display service specific form submission or results display for the last two steps
+            this.state.jobStep >= (steps.length - 2) &&
             <React.Fragment>
             <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
             </React.Fragment>

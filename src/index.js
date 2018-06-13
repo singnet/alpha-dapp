@@ -29,7 +29,7 @@ class App extends React.Component {
 
     this.serviceNameToComponent = {
       'Alpha TensorFlow Agent': AlphaExampleService,
-      //'face_detect': FaceDetectService,
+      'face_detect': FaceDetectService,
     };
     this.serviceDefaultComponent = DefaultService;
     

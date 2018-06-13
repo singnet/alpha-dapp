@@ -7,12 +7,12 @@ class AlphaExampleService extends React.Component {
   constructor(props) {
     super(props);
 
-    this.title = 'Call API';
-    this.submitAction       = this.submitAction.bind(this);
+    this.submitAction = this.submitAction.bind(this);
     this.state = {
         fileUploaded: false,
         file: undefined,
         fileReader: undefined,
+        methodName: "classify",
     };
   }
 
@@ -42,7 +42,7 @@ class AlphaExampleService extends React.Component {
 
   submitAction() {
     this.props.showModalCallback(this.props.callModal);
-    this.props.callApiCallback('classify', 
+    this.props.callApiCallback(this.state.methodName, 
       {
         image: this.state.fileReader.result.split(',')[1],
         image_type: this.state.file.type.split('/')[1],
@@ -118,12 +118,12 @@ class AlphaExampleService extends React.Component {
   }
   
   renderComplete() {
-    return(<div><p>Complete</p>
+    return(
         <div>
           <Divider orientation="left">Job Results</Divider>
           <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.predictions} />
         </div>
-    </div>);
+    );
   }
   render() {
     if (this.isComplete())

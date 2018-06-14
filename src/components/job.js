@@ -263,7 +263,6 @@ class Job extends React.Component {
       }
     ];
     const CallComponent = this.props.callComponent;
-    let skipSNet = false; // for debugging service components
     return(
 
       <React.Fragment>
@@ -313,7 +312,7 @@ class Job extends React.Component {
           <br/>
 
           {
-            (this.state.jobStep < steps.length && !skipSNet) &&
+            (this.state.jobStep < steps.length) &&
               <React.Fragment>
                 <Divider orientation="left">Job Progress</Divider>
 
@@ -328,7 +327,7 @@ class Job extends React.Component {
           }
           {
             // Display service specific form submission or results display for the last two steps
-            (this.state.jobStep >= (steps.length - 2) || skipSNet) &&
+            (this.state.jobStep >= (steps.length - 2)) &&
             <React.Fragment>
             <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
             </React.Fragment>

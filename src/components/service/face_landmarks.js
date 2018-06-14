@@ -194,16 +194,16 @@ class FaceLandmarksService extends React.Component {
           <div>
           <textarea rows="4" cols="50" readOnly value={jsonResult}/>
           </div>
-          <div ref="outsideWrap" class="outsideWrapper">
-          <div class="insideWrapper">
-            <img ref="sourceImg" class="coveredImage" src={this.state.fileReader.result}/>
-            <canvas ref="bboxCanvas" class="coveringCanvas"/>
+          <div ref="outsideWrap" style={styles.outsideWrapper}>
+          <div style={styles.insideWrapper}>
+            <img ref="sourceImg" style={styles.coveredImage} src={this.state.fileReader.result}/>
+            <canvas ref="bboxCanvas" style={styles.coveringCanvas}/>
           </div>
           </div>
         </div>
     );
   }
-  
+
   render() {
     if (this.isComplete())
         return this.renderComplete();

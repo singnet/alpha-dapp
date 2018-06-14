@@ -24,8 +24,7 @@ class FaceAlignmentService extends React.Component {
   isComplete() {
     if (this.props.jobResult === undefined)
         return false;
-    else
-    {
+    else {
         console.log(this.props.jobResult);
         return true;
     }
@@ -81,12 +80,10 @@ class FaceAlignmentService extends React.Component {
 
   submitAction() {
     this.props.showModalCallback(this.props.callModal);
-    this.props.callApiCallback(this.state.methodName, 
-      {
+    this.props.callApiCallback(this.state.methodName, {
         image: this.state.fileReader.result.split(',')[1],
         source_bboxes: JSON.parse(this.state.facesString),
-      }
-    );
+    });
   }
 
   renderForm() {

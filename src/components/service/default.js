@@ -22,8 +22,7 @@ class DefaultService extends React.Component {
   isComplete() {
     if (this.props.jobResult === undefined)
         return false;
-    else
-    {
+    else {
         return true;
     }
   }
@@ -87,6 +86,7 @@ class DefaultService extends React.Component {
           <textarea style={{width:"100%"}} rows="4" readOnly value={jsonResult}/>
     </div>);
   }
+
   render() {
     if (this.isComplete())
         return this.renderComplete();

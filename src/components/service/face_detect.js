@@ -1,5 +1,6 @@
 import React from 'react';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
+import styles from './face_detect.css.js';
 
 class FaceDetectService extends React.Component {
 
@@ -18,8 +19,7 @@ class FaceDetectService extends React.Component {
   isComplete() {
     if (this.props.jobResult === undefined)
         return false;
-    else
-    {
+    else {
         console.log(this.props.jobResult);
         return true;
     }
@@ -41,15 +41,12 @@ class FaceDetectService extends React.Component {
 
   submitAction() {
     this.props.showModalCallback(this.props.callModal);
-    this.props.callApiCallback(this.state.methodName, 
-      {
+    this.props.callApiCallback(this.state.methodName, {
         image: this.state.fileReader.result.split(',')[1],
-      }
-    );
+    });
   }
 
-  renderBoundingBox(result)
-  {
+  renderBoundingBox(result) {
     // {"faces": [{"x": 511, "y": 170, "w": 283, "h": 312}, {"x": 61, "y": 252, "w": 236, "h": 259}]}
     let img = this.refs.sourceImg;
     let cnvs = this.refs.bboxCanvas;
@@ -72,8 +69,7 @@ class FaceDetectService extends React.Component {
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#00ff00';
       ctx.stroke();
-    });
-    
+    }); 
   }
 
   componentDidUpdate(prevProps) {
@@ -129,10 +125,10 @@ class FaceDetectService extends React.Component {
           <div>
           <textarea rows="4" cols="50" readOnly value={jsonResult}/>
           </div>
-          <div ref="outsideWrap" class="outsideWrapper">
-          <div class="insideWrapper">
-            <img ref="sourceImg" class="coveredImage" src={this.state.fileReader.result}/>
-            <canvas ref="bboxCanvas" class="coveringCanvas"/>
+          <div ref="outsideWrap" style={styles.outsideWrapper}>
+          <div style={styles.insideWrapper}>
+            <img ref="sourceImg" style={styles.coveredImage} src={this.state.fileReader.result}/>
+            <canvas ref="bboxCanvas" style={styles.coveringCanvas}/>
           </div>
           </div>
         </div>

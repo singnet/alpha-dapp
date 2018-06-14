@@ -138,7 +138,8 @@ class AlphaExampleService extends React.Component {
         <div>
             <p>
             A service that provides image classification on an RGB image.
-            This was the first service built to demonstrate how the alpha works.
+            This was the first service built to demonstrate how the alpha works
+            and it's code is available at <a href="https://github.com/singnet/alpha-service-example">alpha-service-example</a>
             </p>
         </div>
       )

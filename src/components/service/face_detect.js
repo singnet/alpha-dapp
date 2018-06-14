@@ -133,11 +133,35 @@ class FaceDetectService extends React.Component {
       </div>
     );
   }
+  
+  renderDescription() {
+    return(
+      <div>
+          <p>
+          A service that detects the location of human faces and returns a 2d bounding box.
+          
+          This is part of the <a href="https://github.com/singnet/face-services">face-services</a> suite of example
+          SingularityNET services.
+          </p>
+      </div>
+    )
+  }
+
   render() {
     if (this.isComplete())
-        return this.renderComplete();
+        return (
+            <div>
+            { this.renderDescription() }
+            { this.renderComplete() }
+            </div>
+        );
     else
-        return this.renderForm();
+        return (
+            <div>
+            { this.renderDescription() }
+            { this.renderForm() }
+            </div>
+        )  
   }
 }
 

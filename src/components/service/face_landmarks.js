@@ -203,11 +203,35 @@ class FaceLandmarksService extends React.Component {
     );
   }
 
+  renderDescription() {
+    return(
+      <div>
+          <p>
+          A service that takes an image and a bounding box for where a face exists and returns
+          a list of 2d image coordinates, one for each facial landmark the service knows about.
+          
+          This is part of the <a href="https://github.com/singnet/face-services">face-services</a> suite of example
+          SingularityNET services.
+          </p>
+      </div>
+    )
+  }
+
   render() {
     if (this.isComplete())
-        return this.renderComplete();
+        return (
+            <div>
+            { this.renderDescription() }
+            { this.renderComplete() }
+            </div>
+        );
     else
-        return this.renderForm();
+        return (
+            <div>
+            { this.renderDescription() }
+            { this.renderForm() }
+            </div>
+        )  
   }
 }
 

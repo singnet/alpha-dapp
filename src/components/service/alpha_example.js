@@ -122,16 +122,43 @@ class AlphaExampleService extends React.Component {
   renderComplete() {
     return(
       <div>
+        <br/>
+        {
+            this.state.fileUploaded &&
+            <img src={ this.state.fileReader.result } />
+        }
+        <br/>
         <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.predictions} />
       </div>
     );
   }
 
+  renderDescription() {
+      return(
+        <div>
+            <p>
+            A service that provides image classification on an RGB image.
+            This was the first service built to demonstrate how the alpha works.
+            </p>
+        </div>
+      )
+  }
+
   render() {
     if (this.isComplete())
-        return this.renderComplete();
+        return (
+            <div>
+            { this.renderDescription() }
+            { this.renderComplete() }
+            </div>
+        );
     else
-        return this.renderForm();
+        return (
+            <div>
+            { this.renderDescription() }
+            { this.renderForm() }
+            </div>
+        )  
   }
 }
 

@@ -88,11 +88,39 @@ class DefaultService extends React.Component {
     );
   }
 
+
+  renderDescription() {
+    return(
+      <div>
+          <p>
+          This service is missing a customised UI.
+
+          Eventually service authors will be able to publish a API model that will
+          allow an automatically generated interface, and optionally provide a
+          manually designed one.
+          
+          For now, you need to find documentation for the service, and ensure you
+          call the correct method with the correct parameters.
+          </p>
+      </div>
+    )
+  }
+
   render() {
     if (this.isComplete())
-        return this.renderComplete();
+        return (
+            <div>
+            { this.renderDescription() }
+            { this.renderComplete() }
+            </div>
+        );
     else
-        return this.renderForm();
+        return (
+            <div>
+            { this.renderDescription() }
+            { this.renderForm() }
+            </div>
+        )  
   }
 }
 

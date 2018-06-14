@@ -1,6 +1,7 @@
 import React from 'react';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 import { debounce } from 'underscore';
+import styles from './face_landmarks.css.js';
 
 class FaceLandmarksService extends React.Component {
 

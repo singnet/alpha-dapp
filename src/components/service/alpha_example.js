@@ -19,8 +19,7 @@ class AlphaExampleService extends React.Component {
   isComplete() {
     if (this.props.jobResult === undefined)
         return false;
-    else
-    {
+    else {
         console.log(this.props.jobResult);
         return true;
     }
@@ -42,12 +41,10 @@ class AlphaExampleService extends React.Component {
 
   submitAction() {
     this.props.showModalCallback(this.props.callModal);
-    this.props.callApiCallback(this.state.methodName, 
-      {
+    this.props.callApiCallback(this.state.methodName, {
         image: this.state.fileReader.result.split(',')[1],
         image_type: this.state.file.type.split('/')[1],
-      }
-    );
+    });
   }
 
   componentWillReceiveProps(nextProps) {
@@ -108,7 +105,12 @@ class AlphaExampleService extends React.Component {
         </tr>
         </tbody>
         </table>
-
+        <br/>
+        <br/>
+        {
+            this.state.fileUploaded &&
+            <img src={ this.state.fileReader.result } />
+        }
         <br/>
         <br/>
         <Button type="primary" onClick={() => {this.submitAction(); }} disabled={!this.state.fileUploaded} >Call Agent API</Button>
@@ -125,6 +127,7 @@ class AlphaExampleService extends React.Component {
         </div>
     );
   }
+
   render() {
     if (this.isComplete())
         return this.renderComplete();

@@ -24,8 +24,7 @@ class FaceRecognitionService extends React.Component {
   isComplete() {
     if (this.props.jobResult === undefined)
         return false;
-    else
-    {
+    else {
         console.log(this.props.jobResult);
         return true;
     }
@@ -81,46 +80,10 @@ class FaceRecognitionService extends React.Component {
 
   submitAction() {
     this.props.showModalCallback(this.props.callModal);
-    this.props.callApiCallback(this.state.methodName, 
-      {
+    this.props.callApiCallback(this.state.methodName, {
         image: this.state.fileReader.result.split(',')[1],
         faces: JSON.parse(this.state.facesString)
-      }
-    );
-  }
-
-  renderBoundingBox(result)
-  {
-    // {"faces": [{"x": 511, "y": 170, "w": 283, "h": 312}, {"x": 61, "y": 252, "w": 236, "h": 259}]}
-    let img = this.refs.sourceImg;
-    let cnvs = this.refs.bboxCanvas;
-    let outsideWrap = this.refs.outsideWrap;
-    if (img === undefined || cnvs === undefined || outsideWrap == undefined)
-      return;
-    
-    outsideWrap.style.width = img.naturalWidth + "px";
-    outsideWrap.style.height = img.naturalHeight + "px";
-    cnvs.style.position = "absolute";
-    cnvs.style.left = img.offsetLeft + "px";
-    cnvs.style.top = img.offsetTop + "px";
-    cnvs.width = img.naturalWidth;
-    cnvs.height = img.naturalHeight;
-  
-    let ctx = cnvs.getContext("2d");
-    result["faces"].forEach((item) => {
-      ctx.beginPath();
-      ctx.rect(item["x"],item["y"],item["w"],item["h"]);
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = '#00ff00';
-      ctx.stroke();
     });
-    
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.jobResult !== prevProps.jobResult) {
-      //this.renderBoundingBox(this.props.jobResult);
-    }
   }
 
   renderForm() {
@@ -179,6 +142,7 @@ class FaceRecognitionService extends React.Component {
         </div>
     );
   }
+  
   render() {
     if (this.isComplete())
         return this.renderComplete();

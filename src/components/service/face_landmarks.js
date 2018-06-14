@@ -25,8 +25,7 @@ class FaceLandmarksService extends React.Component {
   isComplete() {
     if (this.props.jobResult === undefined)
         return false;
-    else
-    {
+    else {
         console.log(this.props.jobResult);
         return true;
     }
@@ -85,13 +84,11 @@ class FaceLandmarksService extends React.Component {
 
   submitAction() {
     this.props.showModalCallback(this.props.callModal);
-    this.props.callApiCallback(this.state.methodName, 
-      {
+    this.props.callApiCallback(this.state.methodName, {
         image: this.state.fileReader.result.split(',')[1],
         face_bboxes: JSON.parse(this.state.facesString),
         landmark_model: this.state.landmarkModel,
-      }
-    );
+    });
   }
 
   drawX(ctx, x, y) {
@@ -103,10 +100,9 @@ class FaceLandmarksService extends React.Component {
 
     ctx.moveTo(x + size, y - size);
     ctx.lineTo(x - size, y + size);
-}
+  }
 
-  renderLandmarks(result)
-  {
+  renderLandmarks(result) {
     let img = this.refs.sourceImg;
     let cnvs = this.refs.bboxCanvas;
     let outsideWrap = this.refs.outsideWrap;
@@ -207,6 +203,7 @@ class FaceLandmarksService extends React.Component {
         </div>
     );
   }
+  
   render() {
     if (this.isComplete())
         return this.renderComplete();

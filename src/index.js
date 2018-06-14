@@ -30,6 +30,7 @@ class App extends React.Component {
       chainId:        undefined,
       selectedAgent:  undefined,
       agentCallComponent: undefined,
+      usingDefaultCallComponent: false,
     };
 
     this.serviceNameToComponent = {
@@ -132,6 +133,7 @@ class App extends React.Component {
     this.setState({
       selectedAgent: agent,
       serviceCallComponent: this.serviceNameToComponent[agent.trimName] || this.serviceDefaultComponent,
+      usingDefaultCallComponent: !(agent.trimName in this.serviceNameToComponent),
     });
   }
 
@@ -150,6 +152,9 @@ class App extends React.Component {
                 <Divider/>
                 <Services account={this.state.account} network={this.state.chainId} registry={this.registryInstance} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
                 <Divider/>
+                { this.state.usingDefaultCallComponent &&
+                  <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>
+                }
                 {
                   this.state.selectedAgent && this.state.chainId && this.state.account &&
                   <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />

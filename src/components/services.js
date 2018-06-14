@@ -83,9 +83,9 @@ class Services extends React.Component {
         
         response[0].map((input, index) => {
           let asciiName = Eth.toAscii(input);
+          asciiName = asciiName.substr(0,asciiName.indexOf('\0')); // name is right-padded with null bytes...
           agents[asciiName] = {
             name: asciiName,
-            trimName: asciiName.substr(0,asciiName.indexOf('\0')), // name is right-padded with null bytes...
             address: response[1][index],
             key: response[1][index],
           }

@@ -132,8 +132,8 @@ class App extends React.Component {
     
     this.setState({
       selectedAgent: agent,
-      serviceCallComponent: this.serviceNameToComponent[agent.trimName] || this.serviceDefaultComponent,
-      usingDefaultCallComponent: !(agent.trimName in this.serviceNameToComponent),
+      serviceCallComponent: this.serviceNameToComponent[agent.name] || this.serviceDefaultComponent,
+      usingDefaultCallComponent: !(agent.name in this.serviceNameToComponent),
     });
   }
 

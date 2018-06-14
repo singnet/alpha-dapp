@@ -121,10 +121,9 @@ class AlphaExampleService extends React.Component {
   
   renderComplete() {
     return(
-        <div>
-          <Divider orientation="left">Job Results</Divider>
-          <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.predictions} />
-        </div>
+      <div>
+        <Table pagination={false} columns={this.state.jobKeys} dataSource={this.state.predictions} />
+      </div>
     );
   }
 

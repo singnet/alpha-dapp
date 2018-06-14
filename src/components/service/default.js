@@ -81,10 +81,11 @@ class DefaultService extends React.Component {
   
   renderComplete() {
     let jsonResult = JSON.stringify(this.props.jobResult);
-    return(<div>
-          <Divider orientation="left">Job Results</Divider>
-          <textarea style={{width:"100%"}} rows="4" readOnly value={jsonResult}/>
-    </div>);
+    return(
+      <div>
+        <textarea style={{width:"100%"}} rows="4" readOnly value={jsonResult}/>
+      </div>
+    );
   }
 
   render() {

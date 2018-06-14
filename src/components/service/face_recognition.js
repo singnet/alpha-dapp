@@ -134,15 +134,12 @@ class FaceRecognitionService extends React.Component {
   renderComplete() {
     let jsonResult = JSON.stringify(this.props.jobResult);
     return(
-        <div>
-          <Divider orientation="left">Job Results</Divider>
-          <div>
-          <textarea rows="4" cols="50" readOnly value={jsonResult}/>
-          </div>
-        </div>
+      <div>
+        <textarea rows="4" cols="50" readOnly value={jsonResult}/>
+      </div>
     );
   }
-  
+
   render() {
     if (this.isComplete())
         return this.renderComplete();

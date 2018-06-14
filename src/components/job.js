@@ -329,7 +329,10 @@ class Job extends React.Component {
             // Display service specific form submission or results display for the last two steps
             (this.state.jobStep >= (steps.length - 2)) &&
             <React.Fragment>
+            <div>
+            <Divider orientation="left">Service Call</Divider>
             <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
+            </div>
             </React.Fragment>
           }
 

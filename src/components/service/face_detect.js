@@ -120,18 +120,17 @@ class FaceDetectService extends React.Component {
   renderComplete() {
     let jsonResult = JSON.stringify(this.props.jobResult);
     return(
+      <div>
         <div>
-          <Divider orientation="left">Job Results</Divider>
-          <div>
           <textarea rows="4" cols="50" readOnly value={jsonResult}/>
-          </div>
-          <div ref="outsideWrap" style={styles.outsideWrapper}>
+        </div>
+        <div ref="outsideWrap" style={styles.outsideWrapper}>
           <div style={styles.insideWrapper}>
             <img ref="sourceImg" style={styles.coveredImage} src={this.state.fileReader.result}/>
             <canvas ref="bboxCanvas" style={styles.coveringCanvas}/>
           </div>
-          </div>
         </div>
+      </div>
     );
   }
   render() {

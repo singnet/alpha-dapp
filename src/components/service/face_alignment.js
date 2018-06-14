@@ -136,12 +136,9 @@ class FaceAlignmentService extends React.Component {
       return <img src={'data:image/png;base64,' + item}/>;
     });
     return(
-        <div>
-          <Divider orientation="left">Job Results</Divider>
-          <div>
-            {alignedFaceImgList}
-          </div>
-        </div>
+      <div>
+        {alignedFaceImgList}
+      </div>
     );
   }
   render() {

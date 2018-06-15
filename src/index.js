@@ -10,6 +10,14 @@ import Services from './components/services';
 import Job from './components/job';
 import { NETWORKS, AGI } from './util';
 
+import DefaultService from './components/service/default';
+import AlphaExampleService from './components/service/alpha_example';
+import FaceDetectService from './components/service/face_detect';
+import FaceLandmarksService from './components/service/face_landmarks';
+import FaceAlignmentService from './components/service/face_alignment';
+import FaceRecognitionService from './components/service/face_recognition';
+
+
 class App extends React.Component {
 
   constructor(props) {
@@ -20,8 +28,20 @@ class App extends React.Component {
       ethBalance:     0,
       agiBalance:     0,
       chainId:        undefined,
-      selectedAgent:  undefined
+      selectedAgent:  undefined,
+      agentCallComponent: undefined,
+      usingDefaultCallComponent: false,
     };
+
+    this.serviceNameToComponent = {
+      'Alpha TensorFlow Agent': AlphaExampleService,
+      'face_detect': FaceDetectService,
+      'face_landmarks': FaceLandmarksService,
+      'face_alignment': FaceAlignmentService,
+      'face_recognition': FaceRecognitionService,
+    };
+    this.serviceDefaultComponent = DefaultService;
+    
 
     this.web3               = undefined;
     this.eth                = undefined;
@@ -109,8 +129,11 @@ class App extends React.Component {
 
   hireAgent(agent) {
     console.log("Agent " + agent.name + " selected");
+    
     this.setState({
-      selectedAgent: agent
+      selectedAgent: agent,
+      serviceCallComponent: this.serviceNameToComponent[agent.name] || this.serviceDefaultComponent,
+      usingDefaultCallComponent: !(agent.name in this.serviceNameToComponent),
     });
   }
 
@@ -129,9 +152,12 @@ class App extends React.Component {
                 <Divider/>
                 <Services account={this.state.account} network={this.state.chainId} registry={this.registryInstance} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
                 <Divider/>
+                { this.state.usingDefaultCallComponent &&
+                  <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>
+                }
                 {
                   this.state.selectedAgent && this.state.chainId && this.state.account &&
-                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} token={this.tokenInstance} />
+                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
                 }
               </Col>
             </Row>

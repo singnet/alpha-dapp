@@ -3,6 +3,7 @@ import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table} from 'antd';
 import {NETWORKS, AGENT_STATE, AGI, FORMAT_UTILS} from '../util';
 
+
 class Services extends React.Component {
 
   constructor(props) {
@@ -79,9 +80,12 @@ class Services extends React.Component {
       this.props.registry.listRecords().then(response => {
 
         let agents = {};
+        
         response[0].map((input, index) => {
-          agents[Eth.toAscii(input)] = {
-            name: Eth.toAscii(input),
+          let asciiName = Eth.toAscii(input);
+          asciiName = asciiName.substr(0,asciiName.indexOf('\0')); // name is right-padded with null bytes...
+          agents[asciiName] = {
+            name: asciiName,
             address: response[1][index],
             key: response[1][index],
           }
@@ -104,6 +108,7 @@ class Services extends React.Component {
             agents[agent]['state']        = values[0][0];
             agents[agent]['currentPrice'] = values[1][0];
             agents[agent]['endpoint']     = values[2][0];
+            
           });
         }
 

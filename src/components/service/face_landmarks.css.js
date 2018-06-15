@@ -23,7 +23,6 @@ export default {
     position: 'absolute',
     top: '0px',
     left: '0px',
-    backgroundColor: 'rgba(255,0,0,.1)',
   },
 }
 

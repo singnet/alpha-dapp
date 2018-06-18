@@ -26,8 +26,11 @@ export const AGENT_STATE = {
   "DISABLED": 1,
 };
 
-export class AGI {
+export const STRINGS = {
+  "NULL_ADDRESS" : "0x0000000000000000000000000000000000000000"
+};
 
+export class AGI {
   static toDecimal(agi) {
     return agi / 100000000;
   }

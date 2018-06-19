@@ -1,7 +1,7 @@
 import React from 'react';
 import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table} from 'antd';
-import {NETWORKS, AGENT_STATE, AGI, FORMAT_UTILS} from '../util';
+import {NETWORKS, AGENT_STATE, AGI, FORMAT_UTILS, STRINGS} from '../util';
 
 
 class Services extends React.Component {
@@ -84,10 +84,15 @@ class Services extends React.Component {
         response[0].map((input, index) => {
           let asciiName = Eth.toAscii(input);
           asciiName = asciiName.substr(0,asciiName.indexOf('\0')); // name is right-padded with null bytes...
-          agents[asciiName] = {
+
+          const thisAgent = {
             name: asciiName,
             address: response[1][index],
             key: response[1][index],
+          };
+
+          if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
+            agents[asciiName] = thisAgent;
           }
         });
 

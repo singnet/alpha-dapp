@@ -114,16 +114,39 @@ class Job extends React.Component {
 
   fundJob() {
 
-    this.state.jobInstance.fundJob({from: this.props.account}).then(response => {
+    this.state.jobInstance.fundJob({ from: this.props.account }).then(response => {
 
       this.setState({
         waitingForMetaMask: false,
       });
 
       this.waitForTransaction(response).then(receipt => {
-        console.log('FundJob called on Job: ' + this.state.jobAddress);
-        this.nextJobStep()
+        /**
+         * Here we are waiting for the transaction to be mined 
+         * But not checking if the execution is succesfull or not
+         * 
+         * For now It's important to enforce at least the `fundJob` step
+         * 
+         * For example in the approveTokens step, even if there is not enough balance
+         * It will be succesfull anyway. This isn't good either if it used in combo 
+         * with ERC20 decreaseApproval function can lead to other bugs 
+         * https://github.com/OpenZeppelin/openzeppelin-solidity/issues/437
+         * 
+         * The createJob step will fail only if someone changes the parameters manually
+         * or in absence of ethers for gas, but this is already enforced by MetaMask 
+         */
+
+        if (receipt.status === "0x1") {
+          console.log('FundJob called on Job: ' + this.state.jobAddress);
+          this.nextJobStep()
+        } else {
+            // TODO think a better way to show feedback to user
+            this.handleReject('Transaction has not been executed! Check your AGI balance')
+        }
       });
+       // REFACTOR We should chain the promises, 
+       // in order to use a single higl level `catch`
+       // instead of a Matryoshka style promises  
     }).catch(this.handleReject);
   }
 

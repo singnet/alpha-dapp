@@ -3,7 +3,7 @@ import { abi as agentAbi } from 'singularitynet-alpha-blockchain/Agent.json';
 import { abi as jobAbi } from 'singularitynet-alpha-blockchain/Job.json';
 import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
-import { NETWORKS, AGENT_STATE, AGI } from '../util';
+import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
 import abiDecoder from 'abi-decoder';
 
@@ -60,8 +60,7 @@ class Job extends React.Component {
   }
 
   handleReject(error) {
-    console.log('User rejected transaction');
-    console.log(error);
+    console.log(ERROR_UTILS.sanitizeError(error));
     this.clearModal();
   }
 
@@ -177,7 +176,7 @@ class Job extends React.Component {
     }
 
     if (receipt.status === "0x0") {
-      throw "Transaction has not been executed! Check your AGI balance";
+      throw receipt
     }
 
     return receipt;

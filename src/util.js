@@ -56,30 +56,38 @@ export class FORMAT_UTILS {
   }
 }
 
-const errorMessage = {
+const ERROR_MESSAGE = {
   reject: "User rejected transaction submission or message signing",
   failed: "Transaction mined, but not executed",
   internal: "Internal Server Error",
   unknown: "Unknown error"
 }
 
+const RPC_ERROR_BOUNDS = {
+  internal: [-31099, -32100]
+}
+
 export class ERROR_UTILS {
 
   static sanitizeError(error) {
-    console.log
     if (typeof error === 'object' && error.hasOwnProperty("value")) {
-         // It checks for rejection on both cases of message or transaction
+      // It checks for rejection on both cases of message or transaction
       if (error.value.message.indexOf("User denied") != -1) {
-        return errorMessage.reject;
-      } else if (error.value.code > -31099 && error.value.code < -32100) {
-        return errorMessage.internal
+        return ERROR_MESSAGE.reject;
+      } 
+      
+    //Checks for Internal server error 
+      if (error.value.code > RPC_ERROR_BOUNDS.internal[0]  && error.value.code <  RPC_ERROR_BOUNDS.internal[1] ) {
+        return ERROR_MESSAGE.internal
       }
-    } else if (typeof error === 'object' && error.hasOwnProperty("status") && error.status === "0x0") {
-      //This is the receipt
-      return `${errorMessage.failed} TxHash: ${error.transactionHash}`
     }
 
-    return errorMessage.unknown
+    if (typeof error === 'object' && error.hasOwnProperty("status") && error.status === "0x0") {
+      //This is the receipt
+      return `${ERROR_MESSAGE.failed} TxHash: ${error.transactionHash}`
+    }
+
+    return ERROR_MESSAGE.unknown
   }
 
 }

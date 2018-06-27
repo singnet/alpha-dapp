@@ -16,6 +16,7 @@ import FaceDetectService from './components/service/face_detect';
 import FaceLandmarksService from './components/service/face_landmarks';
 import FaceAlignmentService from './components/service/face_alignment';
 import FaceRecognitionService from './components/service/face_recognition';
+import ExchangeService from './components/service/exchange';
 
 
 class App extends React.Component {
@@ -39,6 +40,7 @@ class App extends React.Component {
       'face_landmarks': FaceLandmarksService,
       'face_alignment': FaceAlignmentService,
       'face_recognition': FaceRecognitionService,
+      'Exchange AGI for BTC': ExchangeService
     };
     this.serviceDefaultComponent = DefaultService;
     

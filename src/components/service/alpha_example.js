@@ -52,8 +52,7 @@ class AlphaExampleService extends React.Component {
     this.parseResult(nextProps);
   }
 
-  parseResult(nextProps)
-  {
+  parseResult(nextProps) {
     if (nextProps.jobResult === undefined)
         return;
     

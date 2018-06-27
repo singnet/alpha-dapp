@@ -1,3 +1,5 @@
+const bitcoin = require("bitcoinjs-lib")
+
 export const NETWORKS = {
   1:  {
     name: "mainnet",
@@ -90,4 +92,13 @@ export class ERROR_UTILS {
     return ERROR_MESSAGE.unknown
   }
 
+}
+
+export const isValidTestnetBitcoinAddress = (address) => {
+  try {
+    bitcoin.address.toOutputScript(address, bitcoin.networks.testnet)
+    return true
+  } catch (e) {
+    return false
+  }
 }

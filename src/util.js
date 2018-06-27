@@ -55,3 +55,39 @@ export class FORMAT_UTILS {
     return `0x${previewPrefix}...${previewSuffix}`;
   }
 }
+
+const ERROR_MESSAGE = {
+  reject: "User rejected transaction submission or message signing",
+  failed: "Transaction mined, but not executed",
+  internal: "Internal Server Error",
+  unknown: "Unknown error"
+}
+
+const RPC_ERROR_BOUNDS = {
+  internal: [-31099, -32100]
+}
+
+export class ERROR_UTILS {
+
+  static sanitizeError(error) {
+    if (typeof error === 'object' && error.hasOwnProperty("value")) {
+      // It checks for rejection on both cases of message or transaction
+      if (error.value.message.indexOf("User denied") != -1) {
+        return ERROR_MESSAGE.reject;
+      } 
+      
+    //Checks for Internal server error 
+      if (error.value.code > RPC_ERROR_BOUNDS.internal[0]  && error.value.code <  RPC_ERROR_BOUNDS.internal[1] ) {
+        return ERROR_MESSAGE.internal
+      }
+    }
+
+    if (typeof error === 'object' && error.hasOwnProperty("status") && error.status === "0x0") {
+      //This is the receipt
+      return `${ERROR_MESSAGE.failed} TxHash: ${error.transactionHash}`
+    }
+
+    return ERROR_MESSAGE.unknown
+  }
+
+}

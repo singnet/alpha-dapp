@@ -8,8 +8,8 @@ class ExchangeService extends React.Component {
     super(props);
 
     this.submitAction = this.submitAction.bind(this);
-    this.handleInputChange = this.handleInputChange.bind(this)
-    this.updateValid = this.updateValid.bind(this)
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.updateValid = this.updateValid.bind(this);
 
     this.state = {
       methodName: 'agibtc',
@@ -20,14 +20,14 @@ class ExchangeService extends React.Component {
   }
 
   submitAction() {
-    const { address, methodName } = this.state
+    const { address, methodName } = this.state;
 
     this.props.showModalCallback(this.props.callModal);
     this.props.callApiCallback(methodName, { address });
   }
 
   componentWillReceiveProps(nextProps) {
-    console.log("Receiving props: ", nextProps)
+    console.log("Receiving props: ", nextProps);
 
     if (nextProps.jobResult === undefined) {
       return;
@@ -45,7 +45,8 @@ class ExchangeService extends React.Component {
   }
 
   handleInputChange(e) {
-    const value = e.target.value 
+    const value = e.target.value;
+
     this.updateValid(value);
     this.setState({
       address: value
@@ -72,7 +73,7 @@ class ExchangeService extends React.Component {
           <br />
           <br />
           {
-            response && <p><strong>{response}</strong></p>
+            response && <p>{response}</p>
           }
           <br />
           <br />
@@ -83,11 +84,11 @@ class ExchangeService extends React.Component {
   }
 
   renderComplete() {
-    const { response } = this.state
+    const { response } = this.state;
     return (
       <div>
         <br />
-        <p> {response}</p>
+        <p>{response}</p>
       </div>
     );
   }
@@ -103,7 +104,7 @@ class ExchangeService extends React.Component {
   }
 
   render() {
-    const isComplete = this.props.jobResult !== undefined
+    const isComplete = this.props.jobResult !== undefined;
     return (
       <div>
         {this.renderDescription()}

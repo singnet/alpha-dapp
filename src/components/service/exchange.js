@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input, Button } from 'antd';
-import { isValidTestnetBitcoinAddress } from '../../util';
+import { isValidAddress } from '../../util';
 
 class ExchangeService extends React.Component {
 
@@ -40,7 +40,7 @@ class ExchangeService extends React.Component {
   }
 
   updateValid(address) {
-    const inputValid = isValidTestnetBitcoinAddress(address);
+    const inputValid = isValidAddress(address, 'bitcoin', 'testnet');
     this.setState({ inputValid });
   }
 

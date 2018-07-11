@@ -27,7 +27,7 @@ class Services extends React.Component {
         render:     (address, agent, index) =>
           this.props.network &&
           <Tag>
-            <a target="_blank" href={`${NETWORKS[this.props.network].etherscan}/address/${address}`}>
+            <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${address}` : "undefined"}>
               {FORMAT_UTILS.toHumanFriendlyAddressPreview(address)}
             </a>
           </Tag>

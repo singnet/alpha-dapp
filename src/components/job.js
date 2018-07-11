@@ -1,6 +1,6 @@
 import React from 'react';
-import { abi as agentAbi } from 'singularitynet-alpha-blockchain/Agent.json';
-import { abi as jobAbi } from 'singularitynet-alpha-blockchain/Job.json';
+import agentAbi from 'singularitynet-alpha-blockchain/abi/Agent.json';
+import jobAbi from 'singularitynet-alpha-blockchain/abi/Job.json';
 import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI } from '../util';
@@ -302,7 +302,7 @@ class Job extends React.Component {
                 <td>
                   {this.state.jobAddress ?
                     <Tag>
-                      <a target="_blank" href={`${NETWORKS[this.props.network].etherscan}/address/${this.state.jobAddress}`}>
+                      <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${this.state.jobAddress}` : undefined}>
                         {this.state.jobAddress}
                       </a>
                     </Tag>

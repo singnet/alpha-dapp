@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Eth from 'ethjs';
-import { networks as registryNetworks, abi as registryAbi } from 'singularitynet-alpha-blockchain/Registry.json';
-import { networks as tokenNetworks, abi as tokenAbi } from 'singularitynet-token-contracts/SingularityNetToken.json';
-import { abi as agentAbi } from 'singularitynet-alpha-blockchain/Agent.json';
+import AlphaRegistryNetworks from 'singularitynet-alpha-blockchain/networks/AlphaRegistry.json';
+import AlphaRegistryAbi from 'singularitynet-alpha-blockchain/abi/AlphaRegistry.json'
+import tokenNetworks from 'singularitynet-token-contracts/networks/SingularityNetToken.json';
+import tokenAbi from 'singularitynet-token-contracts/abi/SingularityNetToken.json';
+import agentAbi from 'singularitynet-alpha-blockchain/abi/Agent.json';
 import {Layout, Divider, Card, Icon, Spin, message, Alert, Row, Col} from 'antd';
 import Account from './components/account';
 import Services from './components/services';
@@ -116,15 +118,17 @@ class App extends React.Component {
   watchNetwork() {
     this.eth.net_version().then(chainId => {
 
-      if (this.state.chainId !== chainId && chainId !== undefined) {
-        console.log("connected to network: " + NETWORKS[chainId].name);
+      if (this.state.chainId !== chainId && typeof chainId !== undefined) {
+        if (typeof NETWORKS[chainId] !== "undefined" && typeof NETWORKS[chainId].name !== "undefined") {
+          console.log("connected to network: " + NETWORKS[chainId].name);
+        }
         this.setState({chainId: chainId});
 
-        this.registryInstance = (chainId in registryNetworks) ? this.eth.contract(registryAbi).at(registryNetworks[chainId].address) : undefined;
+        this.registryInstance = (chainId in AlphaRegistryNetworks) ? this.eth.contract(AlphaRegistryAbi).at(AlphaRegistryNetworks[chainId].address) : undefined;
         this.tokenInstance    = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;
       }
     }).catch(err => {
-      console.log(err)
+      console.log(err);
       this.setState({ chainId: undefined });
     });
   }

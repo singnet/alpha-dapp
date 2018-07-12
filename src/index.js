@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import Eth from 'ethjs';
 import AlphaRegistryNetworks from 'singularitynet-alpha-blockchain/networks/AlphaRegistry.json';
 import AlphaRegistryAbi from 'singularitynet-alpha-blockchain/abi/AlphaRegistry.json'
+import RegistryNetworks from 'singularitynet-alpha-blockchain/networks/Registry.json';
+import RegistryAbi from 'singularitynet-alpha-blockchain/abi/Registry.json'
 import tokenNetworks from 'singularitynet-token-contracts/networks/SingularityNetToken.json';
 import tokenAbi from 'singularitynet-token-contracts/abi/SingularityNetToken.json';
 import agentAbi from 'singularitynet-alpha-blockchain/abi/Agent.json';
@@ -52,7 +54,7 @@ class App extends React.Component {
     this.watchWalletTimer   = undefined;
     this.watchNetworkTimer  = undefined;
     this.agentContract      = undefined;
-    this.registryInstance   = undefined;
+    this.registryInstances  = undefined;
     this.tokenInstance      = undefined;
   }
 
@@ -124,8 +126,11 @@ class App extends React.Component {
         }
         this.setState({chainId: chainId});
 
-        this.registryInstance = (chainId in AlphaRegistryNetworks) ? this.eth.contract(AlphaRegistryAbi).at(AlphaRegistryNetworks[chainId].address) : undefined;
-        this.tokenInstance    = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;
+        this.registryInstances = {};
+        if (chainId in AlphaRegistryNetworks) { this.registryInstances["AlphaRegistry"] = this.eth.contract(AlphaRegistryAbi).at(AlphaRegistryNetworks[chainId].address) };
+        if (chainId in RegistryNetworks) { this.registryInstances["Registry"] = this.eth.contract(RegistryAbi).at(RegistryNetworks[chainId].address) };
+
+        this.tokenInstance = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;
       }
     }).catch(err => {
       console.log(err);
@@ -156,7 +161,7 @@ class App extends React.Component {
               <Col xs={24} sm={24} md={22} lg={15} xl={18} span={9}>
                 <Account network={this.state.chainId} account={this.state.account} ethBalance={this.state.ethBalance} agiBalance={this.state.agiBalance} />
                 <Divider/>
-                <Services account={this.state.account} network={this.state.chainId} registry={this.registryInstance} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
+                <Services account={this.state.account} network={this.state.chainId} registries={this.registryInstances} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
                 <Divider/>
                 { this.state.usingDefaultCallComponent &&
                   <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>

@@ -27,7 +27,7 @@ class Services extends React.Component {
         render:     (address, agent, index) =>
           this.props.network &&
           <Tag>
-            <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${address}` : "undefined"}>
+            <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${address}` : undefined}>
               {FORMAT_UTILS.toHumanFriendlyAddressPreview(address)}
             </a>
           </Tag>
@@ -52,7 +52,7 @@ class Services extends React.Component {
         }
     ].map(column => Object.assign({}, { width: 150 }, column));
 
-    this.watchRegistryTimer = undefined;
+    this.watchRegistriesTimer = undefined;
   }
 
   getAgentButtonText(state, agent) {
@@ -68,33 +68,84 @@ class Services extends React.Component {
   }
 
   componentWillMount() {
-    this.watchRegistryTimer = setInterval(() => this.watchRegistry(), 500);
+    this.watchRegistriesTimer = setInterval(() => this.watchRegistries(), 500);
   }
 
   componentWillUnmount() {
-    clearInterval(this.watchRegistryTimer);
+    clearInterval(this.watchRegistriesTimer);
   }
 
-  watchRegistry() {
-    if(this.props.registry && this.props.agentContract) {
-      this.props.registry.listRecords().then(response => {
+  _hexToAscii(hexString) { 
+    let asciiString = Eth.toAscii(hexString);
+    return asciiString.substr(0,asciiString.indexOf("\0")); // name is right-padded with null bytes
+  }
 
+  _getServiceRegistrations(registry) {
+    return registry.listOrganizations()
+      .then(({ orgNames }) =>
+        Promise.all(orgNames.map(orgName => Promise.all([ Promise.resolve(orgName), registry.listServicesForOrganization(orgName) ])))
+      )
+      .then(servicesByOrg => {
+        const nonEmptyServiceLists = servicesByOrg.filter(([ , { serviceNames } ]) => serviceNames.length);
+        return Promise.all(
+          nonEmptyServiceLists.reduce((acc, [ orgName, { serviceNames } ]) =>
+            acc.concat(serviceNames.map(serviceName => Promise.all([
+              Promise.resolve(orgName),
+              registry.getServiceRegistrationByName(orgName, serviceName)
+            ])))
+          , [])
+        );
+      })
+      .then(servicesList =>
+        Promise.resolve(servicesList.map(([ orgName, { name, agentAddress, servicePath } ]) => ({ orgName, name, agentAddress, servicePath })))
+      )
+      .catch(console.error);
+  };
+
+  watchRegistries() {
+    if(typeof this.props.registries !== "undefined" && this.props.agentContract) {
+      Promise.all([
+        typeof this.props.registries["AlphaRegistry"] !== "undefined" ? this.props.registries["AlphaRegistry"].listRecords() : undefined,
+        typeof this.props.registries["Registry"] !== "undefined" ? this._getServiceRegistrations(this.props.registries["Registry"]) : undefined
+      ])
+      .then(([ alphaRegistryListing, registryListing ]) => {
         let agents = {};
-        
-        response[0].map((input, index) => {
-          let asciiName = Eth.toAscii(input);
-          asciiName = asciiName.substr(0,asciiName.indexOf('\0')); // name is right-padded with null bytes...
 
-          const thisAgent = {
-            name: asciiName,
-            address: response[1][index],
-            key: response[1][index],
-          };
+        if (typeof alphaRegistryListing !== "undefined") {  
+          alphaRegistryListing[0].map((input, index) => {
+            const asciiName = this._hexToAscii(input);
 
-          if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
-            agents[asciiName] = thisAgent;
-          }
-        });
+            const thisAgent = {
+              "name": asciiName,
+              "address": alphaRegistryListing[1][index],
+              "key": [ alphaRegistryListing[1][index], asciiName ].filter(Boolean).join("/"),
+            };
+
+            if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
+              agents[`alpha-${asciiName}`] = thisAgent;
+            }
+          });
+        }
+
+        if (typeof registryListing !== "undefined") {
+          registryListing.forEach(({ orgName, name, agentAddress, servicePath }) => {
+            const serviceAsciiName = this._hexToAscii(name);
+            const serviceAsciiPath = this._hexToAscii(servicePath);
+            const orgAsciiName = this._hexToAscii(orgName);
+
+            const serviceIdentifier = [ orgAsciiName, serviceAsciiPath, serviceAsciiName ].filter(Boolean).join("/");
+            
+            const thisAgent = {
+              "name": serviceIdentifier,
+              "address": agentAddress,
+              "key": [ agentAddress, serviceIdentifier ].filter(Boolean).join("/")
+            };
+
+            if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
+              agents[serviceIdentifier] = thisAgent;
+            }
+          });
+        }
 
         let promises = [];
         

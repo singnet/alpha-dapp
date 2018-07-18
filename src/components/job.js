@@ -119,11 +119,11 @@ class Job extends React.Component {
         waitingForMetaMask: false,
       });
 
-      return this.waitForTransaction(response);
-    }).then(receipt => {
+      this.waitForTransaction(response).then(receipt => {
 
-      console.log('FundJob called on Job: ' + this.state.jobAddress);
-      this.nextJobStep();
+        console.log('FundJob called on Job: ' + this.state.jobAddress);
+        this.nextJobStep();
+      });
     
     }).catch(this.handleReject);
   }

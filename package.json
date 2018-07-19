@@ -22,6 +22,7 @@
   "dependencies": {
     "abi-decoder": "^1.1.0",
     "antd": "^3.4.1",
+    "bitcoinjs-lib": "^3.3.2",
     "ethjs": "^0.3.6",
     "file-loader": "^1.1.11",
     "jquery": "^3.3.1",

@@ -1,19 +1,21 @@
+const bitcoin = require("bitcoinjs-lib")
+
 export const NETWORKS = {
-  1:  {
+  1: {
     name: "mainnet",
     etherscan: 'https://etherscan.io',
     infura: 'http://mainnet.infura.io',
   },
-  3:  {
+  3: {
     name: "Ropsten",
     etherscan: 'https://ropsten.etherscan.io',
     infura: 'https://ropsten.infura.io',
   },
-  4:  {
+  4: {
     name: "Rinkeby",
     etherscan: 'https://rinkeby.etherscan.io',
     infura: 'https://rinkeby.infura.io',
-},
+  },
   42: {
     name: "Kovan",
     etherscan: 'https://kovan.etherscan.io',
@@ -22,12 +24,12 @@ export const NETWORKS = {
 };
 
 export const AGENT_STATE = {
-  "ENABLED":  0,
+  "ENABLED": 0,
   "DISABLED": 1,
 };
 
 export const STRINGS = {
-  "NULL_ADDRESS" : "0x0000000000000000000000000000000000000000"
+  "NULL_ADDRESS": "0x0000000000000000000000000000000000000000"
 };
 
 export class AGI {
@@ -49,8 +51,8 @@ export class FORMAT_UTILS {
     const previewLength = 4;
 
     const addressToShorten = address.startsWith(addressPrefix) ? address.substring(addressPrefix.length) : address;
-    const previewPrefix    = addressToShorten.substring(0, previewLength);
-    const previewSuffix    = addressToShorten.substring(addressToShorten.length - previewLength);
+    const previewPrefix = addressToShorten.substring(0, previewLength);
+    const previewSuffix = addressToShorten.substring(addressToShorten.length - previewLength);
 
     return `0x${previewPrefix}...${previewSuffix}`;
   }
@@ -74,10 +76,10 @@ export class ERROR_UTILS {
       // It checks for rejection on both cases of message or transaction
       if (error.value.message.indexOf("User denied") != -1) {
         return ERROR_MESSAGE.reject;
-      } 
-      
-    //Checks for Internal server error 
-      if (error.value.code > RPC_ERROR_BOUNDS.internal[0]  && error.value.code <  RPC_ERROR_BOUNDS.internal[1] ) {
+      }
+
+      //Checks for Internal server error 
+      if (error.value.code > RPC_ERROR_BOUNDS.internal[0] && error.value.code < RPC_ERROR_BOUNDS.internal[1]) {
         return ERROR_MESSAGE.internal
       }
     }
@@ -90,4 +92,23 @@ export class ERROR_UTILS {
     return ERROR_MESSAGE.unknown
   }
 
+}
+
+
+
+export const isValidAddress = (address, coin, network) => {
+
+  if (coin === 'bitcoin') {
+    network = network === 'testnet' ? bitcoin.networks.testnet : bitcoin.networks.bitcoin
+    try {
+      bitcoin.address.toOutputScript(address, network)
+      return true
+    } catch (e) {
+      return false
+    }
+  } 
+  
+  //TODO Add other future coins address validation here 
+
+  return false
 }

@@ -4,5 +4,3 @@ build
 .idea
 dist/bundle.*
 dist/index.html
-resources/blockchain/.modules-backup
-resources/blockchain/build

@@ -1,18 +1,3 @@
-# Branch specific development instructions
-
-This branch uses contracts that are not yet publicly deployed yet.  
-
-To test this branch locally, please follow these instructions:  
-- Run `npm install` to get the dependencies
-- Compile the blockchain contracts from an appropriate fork and branch that includes the new Registry, featuring Organizations and Type repositories ([this one](https://github.com/vforvalerio87/alpha-blockchain/tree/new_registry) for example); do not run the migrations
-- Copy the compiled contracts and the token contract to the `resources/blockchain/build/contracts` directory in this repository's directory
-- Go to the `resources/blockchain` directory and run `npm install` to get the dependencies for the local testing and development pipeline
-- Run the migrations using the following command: `./scripts/truffle-migrate`. These migrations will update the compiled contract jsons with the addresses of the deployed contracts
-- Package the compiled contracts by running the following command: `node scripts/package-npm.js`
-- Run `node scripts/create-test-symlinks.js` to drop-in the new package as a replacement for the blockchain and token contracts that you have in your `node_modules`
-
----
-
 # AGI Alpha Dapp
 
 This Dapp allows you to browse the list of SingularityNET Agents from the SingularityNET Registry and call them to provide a Service.

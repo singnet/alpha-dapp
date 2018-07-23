@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo "Enter BIP-39 mnemonic: "
-read HDWALLET_MNEMONIC
-echo "Enter target network name (as defined in truffle.js): "
-read NETWORK
-HDWALLET_MNEMONIC=$HDWALLET_MNEMONIC npx truffle migrate --network $NETWORK

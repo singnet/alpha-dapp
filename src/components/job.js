@@ -164,9 +164,15 @@ class Job extends React.Component {
 
           let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
 
-          params['job_address'] = this.state.jobAddress;
-          params['job_signature'] = signature;
-          rpcClient.request(methodName, params).then(rpcResponse => {
+          // If agent is using old bytecode, put auth in params object. Otherwise, put auth in headers as new daemon
+          // must be in use to support new signature scheme
+          let callHeaders = bcSum === oldSigAgentBytecodeChecksum ? {} : {"snet-job-address": this.state.jobAddress,
+            "snet-job-signature": signature};
+
+          let addlParams = bcSum === oldSigAgentBytecodeChecksum ? {job_address: this.state.jobAddress,
+            job_signature: signature} : {};
+
+          rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
 
             console.log(rpcResponse);
             this.setState((prevState) => ({

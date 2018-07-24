@@ -41,7 +41,7 @@ class App extends React.Component {
       'face_landmarks': FaceLandmarksService,
       'face_alignment': FaceAlignmentService,
       'face_recognition': FaceRecognitionService,
-      'Mozi_v1': MoziService
+      'Mozi_v1': MoziService,
       'Exchange AGI for BTC': ExchangeService
     };
     this.serviceDefaultComponent = DefaultService;

@@ -17,11 +17,10 @@ class MoziService extends React.Component {
                 inputCategory: '',
                 resultCount: 100,
                 numberOfThreads: 8,
-                featureSelection: '',
+                featureSelection: 'simple',
                 enableFeatureSelection: true,
                 hcWidenSearch: true,
                 balance: true
-
             },
 
             crossValOptions: {
@@ -30,7 +29,8 @@ class MoziService extends React.Component {
                 testSize: 0.3
             },
             dataset: undefined,
-            methodName: "handle"
+            methodName: "handle",
+            jobDone:false
         };
 
         this.handleTabChange = this.handleTabChange.bind(this);
@@ -76,24 +76,28 @@ class MoziService extends React.Component {
                 crossValidationOptions: this.state.crossValOptions
             }
         });
-
-        event.preventDefault();
     };
 
-    isJobDone(){
-        console.log(this.props.jobResult);
-        return this.props.jobResult !== undefined;
-    };
+    componentDidUpdate(prevProps) {
+        if(this.props.jobResult !== prevProps.jobResult) {
+            //Job is done
+            this.setState({
+                jobDone:true
+            });
+
+            console.log(this.props.jobResult);
+        }
+    }
 
     render() {
 
-        if(!this.isJobDone()){
+        if(!this.state.jobDone){
            return (
             <Tabs renderActiveTabPanelOnly={false} ref={this.tabRef} vertical={false} id="mozi_service" selectedTabId={this.state.tabId}>
                 <Tab id="mos" title="Moses Options"
-                     panel={<Moses_opts nextTab="cro" handleFileUpload={this.handleFileUpload} handleTabChange={this.handleTabChange} handleInputChange={this.handleInputChange} />}/>
+                     panel={<MosesOpts nextTab="cro" handleFileUpload={this.handleFileUpload} handleTabChange={this.handleTabChange} handleInputChange={this.handleInputChange} />}/>
                 <Tab id="cro" title="Cross Options"
-                     panel={<Crossval_opts opts={this.state.crossValOptions} prevTab="mos" handleTabChange={this.handleTabChange} handleInputChange={this.handleInputChange} handleSubmit={this.handleSubmit}/>}/>
+                     panel={<CrossvalOpts opts={this.state.crossValOptions} prevTab="mos" handleTabChange={this.handleTabChange} handleInputChange={this.handleInputChange} handleSubmit={this.handleSubmit}/>}/>
             </Tabs>
             );
         }

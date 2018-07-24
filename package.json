@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/singnet/alpha-dapp#readme",
   "dependencies": {
+    "@blueprintjs/core": "^3.0.1",
     "abi-decoder": "^1.1.0",
     "antd": "^3.4.1",
     "ethjs": "^0.3.6",
@@ -31,6 +32,7 @@
     "react-bootstrap": "^0.32.1",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.3.1",
+    "reflexbox": "^3.0.1",
     "singularitynet-alpha-blockchain": "^1.1.0",
     "styled-components": "^3.2.5"
   },

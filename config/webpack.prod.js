@@ -22,7 +22,7 @@ module.exports = merge(common, {
       test: /\.js/,
       filename (asset) {
         return asset.replace('.gz', '')
-      }
+      },
     })
   ]
 });

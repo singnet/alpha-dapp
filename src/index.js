@@ -16,6 +16,7 @@ import FaceDetectService from './components/service/face_detect';
 import FaceLandmarksService from './components/service/face_landmarks';
 import FaceAlignmentService from './components/service/face_alignment';
 import FaceRecognitionService from './components/service/face_recognition';
+import MoziService from './components/service/mozi_serivce';
 
 
 class App extends React.Component {
@@ -39,6 +40,7 @@ class App extends React.Component {
       'face_landmarks': FaceLandmarksService,
       'face_alignment': FaceAlignmentService,
       'face_recognition': FaceRecognitionService,
+      'Mozi_v1': MoziService
     };
     this.serviceDefaultComponent = DefaultService;
     
@@ -95,7 +97,7 @@ class App extends React.Component {
           console.log('account eth balance is: ' + Eth.fromWei(balance, 'ether'));
           this.setState({ethBalance: balance});
         }
-      })
+      });
 
       if(this.tokenInstance) {
         this.tokenInstance.balanceOf(this.state.account).then(response => {

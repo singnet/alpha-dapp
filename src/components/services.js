@@ -109,7 +109,7 @@ class Services extends React.Component {
         typeof this.props.registries["Registry"] !== "undefined" ? this.getServiceRegistrations(this.props.registries["Registry"]) : undefined
       ])
       .then(([ alphaRegistryListing, registryListing ]) => {
-        let agents = {};
+        let agents = [];
 
         if (typeof alphaRegistryListing !== "undefined") {  
           alphaRegistryListing[0].map((input, index) => {
@@ -122,7 +122,7 @@ class Services extends React.Component {
             };
 
             if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
-              agents[`alpha-${asciiName}`] = thisAgent;
+              agents.push(thisAgent);
             }
           });
         }
@@ -142,7 +142,7 @@ class Services extends React.Component {
             };
 
             if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
-              agents[serviceIdentifier] = thisAgent;
+              agents.push(thisAgent);
             }
           });
         }
@@ -202,7 +202,7 @@ class Services extends React.Component {
     let servicesTable = (columns, dataSource, featured) =>
       <React.Fragment>
         {/* featured ? <h5><Icon type="star" /> Featured</h5> : <h5>Other</h5> */}
-        <Table className="services-table" scroll={{ x: true }} columns={columns} pagination={dataSource.length > 10} dataSource={dataSource} />
+        <Table className="services-table" scroll={{ x: true }} columns={columns} pagination={dataSource.length > 20} dataSource={dataSource} />
         <br/>
       </React.Fragment>
     
@@ -211,9 +211,20 @@ class Services extends React.Component {
     let otherServices = () => servicesTable(this.servicesTableKeys, this.state.agents.other)
     */
     // TODO: destroy the allServices table once we go live with the Featured agents distinction
-    let allServicesList = () =>
-      Object.values(this.state.agents).reduce((acc, cur) =>
-        cur.length !== 0 ? acc.concat(cur) : acc, [])
+    let allServicesList = () => {
+      const serviceInOrg = name => name.split("/").length > 1;
+      return Object.values(this.state.agents)
+        .reduce((acc, cur) => cur.length !== 0 ? acc.concat(cur) : acc, [])
+        .sort((a, b) => {
+          const aInOrg = serviceInOrg(a.name);
+          const bInOrg = serviceInOrg(b.name);
+          if (aInOrg !== bInOrg) {
+            return bInOrg - aInOrg;
+          } else {
+            return a.name.localeCompare(b.name);
+          }
+        });
+    };
 
     let allServicesTable = () => servicesTable(this.servicesTableKeys, allServicesList())
 

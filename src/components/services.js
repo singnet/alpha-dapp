@@ -57,7 +57,7 @@ class Services extends React.Component {
 
   getAgentButtonText(state, agent) {
     if (this.props.account) {
-      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.address !== agent.address) {
+      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.key !== agent.key) {
         return state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled';
       } else {
         return 'Selected';
@@ -75,12 +75,12 @@ class Services extends React.Component {
     clearInterval(this.watchRegistriesTimer);
   }
 
-  _hexToAscii(hexString) { 
+  hexToAscii(hexString) { 
     let asciiString = Eth.toAscii(hexString);
     return asciiString.substr(0,asciiString.indexOf("\0")); // name is right-padded with null bytes
   }
 
-  _getServiceRegistrations(registry) {
+  getServiceRegistrations(registry) {
     return registry.listOrganizations()
       .then(({ orgNames }) =>
         Promise.all(orgNames.map(orgName => Promise.all([ Promise.resolve(orgName), registry.listServicesForOrganization(orgName) ])))
@@ -106,14 +106,14 @@ class Services extends React.Component {
     if(typeof this.props.registries !== "undefined" && this.props.agentContract) {
       Promise.all([
         typeof this.props.registries["AlphaRegistry"] !== "undefined" ? this.props.registries["AlphaRegistry"].listRecords() : undefined,
-        typeof this.props.registries["Registry"] !== "undefined" ? this._getServiceRegistrations(this.props.registries["Registry"]) : undefined
+        typeof this.props.registries["Registry"] !== "undefined" ? this.getServiceRegistrations(this.props.registries["Registry"]) : undefined
       ])
       .then(([ alphaRegistryListing, registryListing ]) => {
         let agents = {};
 
         if (typeof alphaRegistryListing !== "undefined") {  
           alphaRegistryListing[0].map((input, index) => {
-            const asciiName = this._hexToAscii(input);
+            const asciiName = this.hexToAscii(input);
 
             const thisAgent = {
               "name": asciiName,
@@ -129,9 +129,9 @@ class Services extends React.Component {
 
         if (typeof registryListing !== "undefined") {
           registryListing.forEach(({ orgName, name, agentAddress, servicePath }) => {
-            const serviceAsciiName = this._hexToAscii(name);
-            const serviceAsciiPath = this._hexToAscii(servicePath);
-            const orgAsciiName = this._hexToAscii(orgName);
+            const serviceAsciiName = this.hexToAscii(name);
+            const serviceAsciiPath = this.hexToAscii(servicePath);
+            const orgAsciiName = this.hexToAscii(orgName);
 
             const serviceIdentifier = [ orgAsciiName, serviceAsciiPath, serviceAsciiName ].filter(Boolean).join("/");
             

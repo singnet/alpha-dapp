@@ -63,11 +63,11 @@ const ERROR_MESSAGE = {
   failed: "Transaction mined, but not executed",
   internal: "Internal Server Error",
   unknown: "Unknown error"
-}
+};
 
 const RPC_ERROR_BOUNDS = {
   internal: [-31099, -32100]
-}
+};
 
 export class ERROR_UTILS {
 

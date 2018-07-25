@@ -1,9 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Eth from 'ethjs';
-import { networks as registryNetworks, abi as registryAbi } from 'singularitynet-alpha-blockchain/Registry.json';
-import { networks as tokenNetworks, abi as tokenAbi } from 'singularitynet-token-contracts/SingularityNetToken.json';
-import { abi as agentAbi } from 'singularitynet-alpha-blockchain/Agent.json';
+import AlphaRegistryNetworks from 'singularitynet-platform-contracts/networks/AlphaRegistry.json';
+import AlphaRegistryAbi from 'singularitynet-platform-contracts/abi/AlphaRegistry.json'
+import RegistryNetworks from 'singularitynet-platform-contracts/networks/Registry.json';
+import RegistryAbi from 'singularitynet-platform-contracts/abi/Registry.json'
+import tokenNetworks from 'singularitynet-token-contracts/networks/SingularityNetToken.json';
+import tokenAbi from 'singularitynet-token-contracts/abi/SingularityNetToken.json';
+import agentAbi from 'singularitynet-platform-contracts/abi/Agent.json';
 import {Layout, Divider, Card, Icon, Spin, message, Alert, Row, Col} from 'antd';
 import Account from './components/account';
 import Services from './components/services';
@@ -50,7 +54,7 @@ class App extends React.Component {
     this.watchWalletTimer   = undefined;
     this.watchNetworkTimer  = undefined;
     this.agentContract      = undefined;
-    this.registryInstance   = undefined;
+    this.registryInstances  = undefined;
     this.tokenInstance      = undefined;
   }
 
@@ -116,15 +120,20 @@ class App extends React.Component {
   watchNetwork() {
     this.eth.net_version().then(chainId => {
 
-      if (this.state.chainId !== chainId && chainId !== undefined) {
-        console.log("connected to network: " + NETWORKS[chainId].name);
+      if (this.state.chainId !== chainId && typeof chainId !== undefined) {
+        if (typeof NETWORKS[chainId] !== "undefined" && typeof NETWORKS[chainId].name !== "undefined") {
+          console.log("connected to network: " + NETWORKS[chainId].name);
+        }
         this.setState({chainId: chainId});
 
-        this.registryInstance = (chainId in registryNetworks) ? this.eth.contract(registryAbi).at(registryNetworks[chainId].address) : undefined;
-        this.tokenInstance    = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;
+        this.registryInstances = {};
+        if (chainId in AlphaRegistryNetworks) { this.registryInstances["AlphaRegistry"] = this.eth.contract(AlphaRegistryAbi).at(AlphaRegistryNetworks[chainId].address) };
+        if (chainId in RegistryNetworks) { this.registryInstances["Registry"] = this.eth.contract(RegistryAbi).at(RegistryNetworks[chainId].address) };
+
+        this.tokenInstance = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;
       }
     }).catch(err => {
-      console.log(err)
+      console.log(err);
       this.setState({ chainId: undefined });
     });
   }
@@ -152,7 +161,7 @@ class App extends React.Component {
               <Col xs={24} sm={24} md={22} lg={15} xl={18} span={9}>
                 <Account network={this.state.chainId} account={this.state.account} ethBalance={this.state.ethBalance} agiBalance={this.state.agiBalance} />
                 <Divider/>
-                <Services account={this.state.account} network={this.state.chainId} registry={this.registryInstance} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
+                <Services account={this.state.account} network={this.state.chainId} registries={this.registryInstances} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
                 <Divider/>
                 { this.state.usingDefaultCallComponent &&
                   <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>

@@ -1,12 +1,17 @@
 import React from 'react';
-import { abi as agentAbi } from 'singularitynet-alpha-blockchain/Agent.json';
-import { abi as jobAbi } from 'singularitynet-alpha-blockchain/Job.json';
+import agentAbi from 'singularitynet-platform-contracts/abi/Agent.json';
+import jobAbi from 'singularitynet-platform-contracts/abi/Job.json';
 import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
 import abiDecoder from 'abi-decoder';
+import md5 from 'md5';
 
+// Version 1 of the Agent contract expects the signed 20-byte job address and we've hardcoded the
+// checksum of the bytecode for this version below. Version 2 expects the signed 42-byte hex-encoded
+// job address.
+const oldSigAgentBytecodeChecksum = "f4b0a8064a38abaf2630f5f6bd0043c8";
 
 class Job extends React.Component {
 
@@ -130,43 +135,61 @@ class Job extends React.Component {
 
   callApi(methodName, params) {
 
-    var addressBytes = [];
-    for(var i=2; i< this.state.jobAddress.length-1; i+=2) {
+    let addressBytes = [];
+    for(let i=2; i< this.state.jobAddress.length-1; i+=2) {
       addressBytes.push(parseInt(this.state.jobAddress.substr(i, 2), 16));
     }
 
-    window.ethjs.personal_sign(Eth.keccak256(addressBytes), this.props.account).then(signature => {
+    window.ethjs.getCode(this.props.agent.contractInstance.address).then((bytecode) => {
+      let bcBytes = [];
+      for (let i = 2; i < bytecode.length; i += 2) {
+        bcBytes.push(parseInt(bytecode.substr(i, 2), 16));
+      }
 
-      this.setState({
-        waitingForMetaMask: false,
-      });
+      let bcSum = md5(bcBytes);
+      let sigPayload = bcSum === oldSigAgentBytecodeChecksum ? Eth.keccak256(addressBytes) : Eth.fromUtf8(this.state.jobAddress);
 
-      let r = `0x${signature.slice(2, 66)}`;
-      let s = `0x${signature.slice(66, 130)}`;
-      let v = parseInt(signature.slice(130, 132), 16);
+      window.ethjs.personal_sign(sigPayload, this.props.account).then(signature => {
 
-      this.props.agent.contractInstance.validateJobInvocation(this.state.jobAddress, v, r, s, {from: this.props.account}).then(validateJob => {
-        console.log('job invocation validation returned: ' + validateJob[0]);
-
-        let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
-
-        params['job_address'] = this.state.jobAddress;
-        params['job_signature'] = signature;
-        rpcClient.request(methodName, params).then(rpcResponse => {
-
-          console.log(rpcResponse);
-          this.setState((prevState) => ({
-            jobResult: rpcResponse,
-          }));
-
-          this.nextJobStep();
-
-        }).catch(rpcError => {
-          console.log(rpcError);
+        this.setState({
+          waitingForMetaMask: false,
         });
 
-      });
-    }).catch(this.handleReject);
+        let r = `0x${signature.slice(2, 66)}`;
+        let s = `0x${signature.slice(66, 130)}`;
+        let v = parseInt(signature.slice(130, 132), 16);
+
+        this.props.agent.contractInstance.validateJobInvocation(this.state.jobAddress, v, r, s, {from: this.props.account}).then(validateJob => {
+          console.log('job invocation validation returned: ' + validateJob[0]);
+
+          let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
+
+          // If agent is using old bytecode, put auth in params object. Otherwise, put auth in headers as new daemon
+          // must be in use to support new signature scheme
+          let callHeaders = bcSum === oldSigAgentBytecodeChecksum ? {} : {"snet-job-address": this.state.jobAddress,
+            "snet-job-signature": signature};
+
+          let addlParams = bcSum === oldSigAgentBytecodeChecksum ? {job_address: this.state.jobAddress,
+            job_signature: signature} : {};
+
+          rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
+
+            console.log(rpcResponse);
+            this.setState((prevState) => ({
+              jobResult: rpcResponse,
+            }));
+
+            this.nextJobStep();
+
+          }).catch(rpcError => {
+            console.log(rpcError);
+          });
+
+        });
+      }).catch(this.handleReject);
+    }).catch((error) => {
+      console.log("getCode error", error);
+    });
   }
 
   async waitForTransaction(hash) {
@@ -198,8 +221,8 @@ class Job extends React.Component {
         }
       </Modal>
     
-    let blockchainModal = () => modal('blockchain')
-    let serviceModal = () => modal('service')
+    let blockchainModal = () => modal('blockchain');
+    let serviceModal = () => modal('service');
 
     let steps = [
       {
@@ -302,7 +325,7 @@ class Job extends React.Component {
                 <td>
                   {this.state.jobAddress ?
                     <Tag>
-                      <a target="_blank" href={`${NETWORKS[this.props.network].etherscan}/address/${this.state.jobAddress}`}>
+                      <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${this.state.jobAddress}` : undefined}>
                         {this.state.jobAddress}
                       </a>
                     </Tag>

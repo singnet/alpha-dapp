@@ -14,10 +14,10 @@ class MoziService extends React.Component {
                 maximumEvals: 1000,
                 featureSelectionTargetSize: 4,
                 reductKnobBuildingEffort: 0,
-                inputCategory: '',
+                inputCategory: 'older-than',
                 resultCount: 100,
                 numberOfThreads: 8,
-                featureSelection: 'simple',
+                featureSelectionAlgorithm: 'simple',
                 enableFeatureSelection: true,
                 hcWidenSearch: true,
                 balance: true
@@ -37,6 +37,7 @@ class MoziService extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleFileUpload = this.handleFileUpload.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
+        this.handleResultLink = this.handleResultLink.bind(this);
 
 
     }
@@ -76,7 +77,13 @@ class MoziService extends React.Component {
                 crossValidationOptions: this.state.crossValOptions
             }
         });
+        event.preventDefault();
     };
+
+    handleResultLink(event) {
+        window.open(this.props.jobResult, '_blank');
+        event.preventDefault();
+    }
 
     componentDidUpdate(prevProps) {
         if(this.props.jobResult !== prevProps.jobResult) {
@@ -104,7 +111,7 @@ class MoziService extends React.Component {
         else{
             return (
                 <div>
-                You can poll the result from this <a href={this.props.jobResult}>link</a>.
+                You can poll the result from this <a onClick={this.handleResultLink}>link</a>.
             </div>
             );
         }

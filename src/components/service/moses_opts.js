@@ -111,7 +111,7 @@ class MosesOpts extends React.Component {
                         labelFor="fs-sel"
                         label="Feature Selection"
                     >
-                        <HTMLSelect name="featureSelection" id="fs-sel" fill={true}
+                        <HTMLSelect name="featureSelectionAlgorithm" id="fs-sel" fill={true}
                                 onChange={(evt) =>  this.props.handleInputChange(evt)}>
                             <option  value="simple">simple</option>
                             <option value="inc">inc</option>

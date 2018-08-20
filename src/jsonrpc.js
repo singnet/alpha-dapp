@@ -15,12 +15,12 @@ export class JsonRpcClient {
     this.headers = Object.assign({}, defaultHeaders, headers);
   }
 
-  request(method, params) {
+  request(method, params, headers) {
     const id = this.lastId++;
 
     const req = {
       method: 'POST',
-      headers: this.headers,
+      headers: Object.assign({}, this.headers, headers),
       body: JSON.stringify({
         jsonrpc: '2.0',
         id,

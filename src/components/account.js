@@ -33,7 +33,7 @@ class Account extends React.Component {
                 Address
                 <Divider type="vertical"/>
                 <Tag>
-                  <a target="_blank" href={this.props.network && this.props.account && `${NETWORKS[this.props.network].etherscan}/address/${this.props.account}`}>
+                  <a target="_blank" href={this.props.network && this.props.account && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${this.props.account}` : undefined}>
                     {this.props.account}
                   </a>
                 </Tag>

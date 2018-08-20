@@ -27,7 +27,7 @@ class Services extends React.Component {
         render:     (address, agent, index) =>
           this.props.network &&
           <Tag>
-            <a target="_blank" href={`${NETWORKS[this.props.network].etherscan}/address/${address}`}>
+            <a target="_blank" href={this.props.network && typeof NETWORKS[this.props.network] !== "undefined" ? `${NETWORKS[this.props.network].etherscan}/address/${address}` : undefined}>
               {FORMAT_UTILS.toHumanFriendlyAddressPreview(address)}
             </a>
           </Tag>
@@ -52,12 +52,12 @@ class Services extends React.Component {
         }
     ].map(column => Object.assign({}, { width: 150 }, column));
 
-    this.watchRegistryTimer = undefined;
+    this.watchRegistriesTimer = undefined;
   }
 
   getAgentButtonText(state, agent) {
     if (this.props.account) {
-      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.address !== agent.address) {
+      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.key !== agent.key) {
         return state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled';
       } else {
         return 'Selected';
@@ -68,33 +68,84 @@ class Services extends React.Component {
   }
 
   componentWillMount() {
-    this.watchRegistryTimer = setInterval(() => this.watchRegistry(), 500);
+    this.watchRegistriesTimer = setInterval(() => this.watchRegistries(), 500);
   }
 
   componentWillUnmount() {
-    clearInterval(this.watchRegistryTimer);
+    clearInterval(this.watchRegistriesTimer);
   }
 
-  watchRegistry() {
-    if(this.props.registry && this.props.agentContract) {
-      this.props.registry.listRecords().then(response => {
+  hexToAscii(hexString) { 
+    let asciiString = Eth.toAscii(hexString);
+    return asciiString.substr(0,asciiString.indexOf("\0")); // name is right-padded with null bytes
+  }
 
-        let agents = {};
-        
-        response[0].map((input, index) => {
-          let asciiName = Eth.toAscii(input);
-          asciiName = asciiName.substr(0,asciiName.indexOf('\0')); // name is right-padded with null bytes...
+  getServiceRegistrations(registry) {
+    return registry.listOrganizations()
+      .then(({ orgNames }) =>
+        Promise.all(orgNames.map(orgName => Promise.all([ Promise.resolve(orgName), registry.listServicesForOrganization(orgName) ])))
+      )
+      .then(servicesByOrg => {
+        const nonEmptyServiceLists = servicesByOrg.filter(([ , { serviceNames } ]) => serviceNames.length);
+        return Promise.all(
+          nonEmptyServiceLists.reduce((acc, [ orgName, { serviceNames } ]) =>
+            acc.concat(serviceNames.map(serviceName => Promise.all([
+              Promise.resolve(orgName),
+              registry.getServiceRegistrationByName(orgName, serviceName)
+            ])))
+          , [])
+        );
+      })
+      .then(servicesList =>
+        Promise.resolve(servicesList.map(([ orgName, { name, agentAddress, servicePath } ]) => ({ orgName, name, agentAddress, servicePath })))
+      )
+      .catch(console.error);
+  };
 
-          const thisAgent = {
-            name: asciiName,
-            address: response[1][index],
-            key: response[1][index],
-          };
+  watchRegistries() {
+    if(typeof this.props.registries !== "undefined" && this.props.agentContract) {
+      Promise.all([
+        typeof this.props.registries["AlphaRegistry"] !== "undefined" ? this.props.registries["AlphaRegistry"].listRecords() : undefined,
+        typeof this.props.registries["Registry"] !== "undefined" ? this.getServiceRegistrations(this.props.registries["Registry"]) : undefined
+      ])
+      .then(([ alphaRegistryListing, registryListing ]) => {
+        let agents = [];
 
-          if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
-            agents[asciiName] = thisAgent;
-          }
-        });
+        if (typeof alphaRegistryListing !== "undefined") {  
+          alphaRegistryListing[0].map((input, index) => {
+            const asciiName = this.hexToAscii(input);
+
+            const thisAgent = {
+              "name": asciiName,
+              "address": alphaRegistryListing[1][index],
+              "key": [ alphaRegistryListing[1][index], asciiName ].filter(Boolean).join("/"),
+            };
+
+            if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
+              agents.push(thisAgent);
+            }
+          });
+        }
+
+        if (typeof registryListing !== "undefined") {
+          registryListing.forEach(({ orgName, name, agentAddress, servicePath }) => {
+            const serviceAsciiName = this.hexToAscii(name);
+            const serviceAsciiPath = this.hexToAscii(servicePath);
+            const orgAsciiName = this.hexToAscii(orgName);
+
+            const serviceIdentifier = [ orgAsciiName, serviceAsciiPath, serviceAsciiName ].filter(Boolean).join("/");
+            
+            const thisAgent = {
+              "name": serviceIdentifier,
+              "address": agentAddress,
+              "key": [ agentAddress, serviceIdentifier ].filter(Boolean).join("/")
+            };
+
+            if (thisAgent.name !== "" && thisAgent.address !== STRINGS.NULL_ADDRESS) {
+              agents.push(thisAgent);
+            }
+          });
+        }
 
         let promises = [];
         
@@ -151,7 +202,7 @@ class Services extends React.Component {
     let servicesTable = (columns, dataSource, featured) =>
       <React.Fragment>
         {/* featured ? <h5><Icon type="star" /> Featured</h5> : <h5>Other</h5> */}
-        <Table className="services-table" scroll={{ x: true }} columns={columns} pagination={dataSource.length > 10} dataSource={dataSource} />
+        <Table className="services-table" scroll={{ x: true }} columns={columns} pagination={dataSource.length > 20} dataSource={dataSource} />
         <br/>
       </React.Fragment>
     
@@ -160,9 +211,20 @@ class Services extends React.Component {
     let otherServices = () => servicesTable(this.servicesTableKeys, this.state.agents.other)
     */
     // TODO: destroy the allServices table once we go live with the Featured agents distinction
-    let allServicesList = () =>
-      Object.values(this.state.agents).reduce((acc, cur) =>
-        cur.length !== 0 ? acc.concat(cur) : acc, [])
+    let allServicesList = () => {
+      const serviceInOrg = name => name.split("/").length > 1;
+      return Object.values(this.state.agents)
+        .reduce((acc, cur) => cur.length !== 0 ? acc.concat(cur) : acc, [])
+        .sort((a, b) => {
+          const aInOrg = serviceInOrg(a.name);
+          const bInOrg = serviceInOrg(b.name);
+          if (aInOrg !== bInOrg) {
+            return bInOrg - aInOrg;
+          } else {
+            return a.name.localeCompare(b.name);
+          }
+        });
+    };
 
     let allServicesTable = () => servicesTable(this.servicesTableKeys, allServicesList())
 

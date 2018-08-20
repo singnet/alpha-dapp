@@ -37,10 +37,9 @@
     "singularitynet-platform-contracts": "0.2.1",
     "singularitynet-token-contracts": "2.0.0",
     "styled-components": "^3.2.5",
-    "underscore": "^1.9.1"
-    "reflexbox": "^3.0.1",
+    "underscore": "^1.9.1",
     "singularitynet-alpha-blockchain": "^1.1.0",
-    "styled-components": "^3.2.5"
+    "reflexbox": "^3.0.1"
   },
   "devDependencies": {
     "aws-sdk": "^2.279.1",

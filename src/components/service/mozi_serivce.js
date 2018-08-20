@@ -81,7 +81,8 @@ class MoziService extends React.Component {
     };
 
     handleResultLink(event) {
-        window.open(this.props.jobResult, '_blank');
+        const link = this.props.jobResult.replace(/['"]+/g, '');
+        window.open(link, '_blank');
         event.preventDefault();
     }
 

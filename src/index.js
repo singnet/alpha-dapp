@@ -21,6 +21,7 @@ import FaceLandmarksService from './components/service/face_landmarks';
 import FaceAlignmentService from './components/service/face_alignment';
 import FaceRecognitionService from './components/service/face_recognition';
 import ExchangeService from './components/service/exchange';
+import ResNetImageRecon from './components/service/resnet_img_recon';
 
 
 class App extends React.Component {
@@ -44,7 +45,8 @@ class App extends React.Component {
       'face_landmarks': FaceLandmarksService,
       'face_alignment': FaceAlignmentService,
       'face_recognition': FaceRecognitionService,
-      'Exchange AGI for BTC': ExchangeService
+      'Exchange AGI for BTC': ExchangeService,
+      'SNET_BH/ResNetService': ResNetImageRecon
     };
     this.serviceDefaultComponent = DefaultService;
     

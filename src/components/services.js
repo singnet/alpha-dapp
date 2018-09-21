@@ -11,7 +11,6 @@ class Services extends React.Component {
 
     this.state = {
       agents : [],
-      selectedAgent: undefined,
     };
 
     this.servicesTableKeys = [
@@ -46,8 +45,13 @@ class Services extends React.Component {
         title:      '',
         dataIndex:  'state',
         render:     (state, agent, index) =>
-          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={ !(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' || typeof this.state.selectedAgent !== 'undefined' } onClick={() => { this.setState({ selectedAgent: agent }); return this.props.onAgentClick(agent); }} >
-            { this.getAgentButtonText(state, agent) }
+          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'}
+                  onClick={() => { return this.props.onAgentClick(agent); }}
+                  disabled={ !(state == AGENT_STATE.ENABLED)
+                              || typeof this.props.account === 'undefined'
+                              || this.props.jobInProgress
+                              || this.isSelectedAgent(agent)}>
+            {this.getAgentButtonText(state, agent) }
           </Button>
         }
     ].map(column => Object.assign({}, { width: 150 }, column));
@@ -55,9 +59,16 @@ class Services extends React.Component {
     this.watchRegistriesTimer = undefined;
   }
 
+  isSelectedAgent(agent){
+    if (this.props.selectedAgent !== undefined) {
+      return this.props.selectedAgent.key === agent.key;
+    }
+    return false;
+  }
+
   getAgentButtonText(state, agent) {
     if (this.props.account) {
-      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.key !== agent.key) {
+      if (typeof this.props.selectedAgent === 'undefined' || this.props.selectedAgent.key !== agent.key) {
         return state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled';
       } else {
         return 'Selected';

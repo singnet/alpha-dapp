@@ -2,7 +2,7 @@ import React from 'react';
 import agentAbi from 'singularitynet-platform-contracts/abi/Agent.json';
 import jobAbi from 'singularitynet-platform-contracts/abi/Job.json';
 import Eth from 'ethjs';
-import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
+import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload, Popconfirm} from 'antd';
 import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
 import abiDecoder from 'abi-decoder';
@@ -96,6 +96,7 @@ class Job extends React.Component {
           }));
 
           this.nextJobStep();
+          this.props.sendJobInProgress(true);
         }
       });
     }).catch(this.handleReject);
@@ -204,7 +205,7 @@ class Job extends React.Component {
 
     return receipt;
   }
-  
+
   render() {
 
     let modal = type => 
@@ -359,13 +360,24 @@ class Job extends React.Component {
             // Display service specific form submission or results display for the last two steps
             (this.state.jobStep >= (steps.length - 2)) &&
             <React.Fragment>
-            <div>
-            <Divider orientation="left">Service Call</Divider>
-            <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
-            </div>
+              <div>
+                <Divider orientation="left">Service Call</Divider>
+                <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
+              </div>
             </React.Fragment>
           }
-
+          {
+            // Display a button that allows the user to end the job, clear the data and possibly choose another job
+            (this.state.jobStep >= (steps.length - 1)) &&
+            <React.Fragment>
+              <div align="center">
+                <Divider type="horizontal"/>
+                <Popconfirm title="Are you sure you want to end this job? This will clear all the data from the interface." onConfirm={() => this.props.sendJobInProgress(false)} okText="Yes" cancelText="No">
+                  <Button type="primary">End Job</Button>
+                </Popconfirm>
+              </div>
+            </React.Fragment>
+          }
         </Card>
       </React.Fragment>
     );

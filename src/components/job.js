@@ -7,6 +7,7 @@ import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
 import abiDecoder from 'abi-decoder';
 import md5 from 'md5';
+import ProtoBuf from '../ProtoBuf';
 
 // Version 1 of the Agent contract expects the signed 20-byte job address and we've hardcoded the
 // checksum of the bytecode for this version below. Version 2 expects the signed 42-byte hex-encoded
@@ -133,8 +134,7 @@ class Job extends React.Component {
     }).catch(this.handleReject);
   }
 
-  callApi(methodName, params) {
-
+  callApi(methodName, params, grpc) {
     let addressBytes = [];
     for(let i=2; i< this.state.jobAddress.length-1; i+=2) {
       addressBytes.push(parseInt(this.state.jobAddress.substr(i, 2), 16));
@@ -159,31 +159,60 @@ class Job extends React.Component {
         let s = `0x${signature.slice(66, 130)}`;
         let v = parseInt(signature.slice(130, 132), 16);
 
-        this.props.agent.contractInstance.validateJobInvocation(this.state.jobAddress, v, r, s, {from: this.props.account}).then(validateJob => {
+        return this.props.agent.contractInstance.validateJobInvocation(this.state.jobAddress, v, r, s, {from: this.props.account}).then(validateJob => {
           console.log('job invocation validation returned: ' + validateJob[0]);
 
-          let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
-
+          
           // If agent is using old bytecode, put auth in params object. Otherwise, put auth in headers as new daemon
           // must be in use to support new signature scheme
           let callHeaders = bcSum === oldSigAgentBytecodeChecksum ? {} : {"snet-job-address": this.state.jobAddress,
-            "snet-job-signature": signature};
-
+          "snet-job-signature": signature};
+          
           let addlParams = bcSum === oldSigAgentBytecodeChecksum ? {job_address: this.state.jobAddress,
             job_signature: signature} : {};
+            
+          
+          if (grpc) {
+            //TODO Fetch from ipfs endpoint the json
+            //NOTICE this is to fewtch from local filesystem 
+            const jsonDescriptor  = require("../example.json");
+            const endpoint        = this.props.agent.endpoint;
+            const ProtoBufClient  = new ProtoBuf({ jsonDescriptor, endpoint, config: callHeaders });
+            ProtoBufClient.generateStubs();
 
-          rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
+            const serviceName     = ProtoBufClient.findServiceByMethod(methodName); 
+            const currentService  = ProtoBufClient.services[serviceName];
+            const currentMethod   = currentService.methods[methodName];
 
-            console.log(rpcResponse);
-            this.setState((prevState) => ({
-              jobResult: rpcResponse,
-            }));
+            return currentMethod.call(params).then(grpcResponse => {
+              console.log(grpcResponse);
+              
+              this.setState((prevState) => ({
+                jobResult: grpcResponse,
+              }));
 
-            this.nextJobStep();
+              this.nextJobStep();
 
-          }).catch(rpcError => {
-            console.log(rpcError);
-          });
+            }).catch(grpcError => {
+              console.error(grpcError);
+              throw grpcError;
+            });
+
+          } else {
+            let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
+            rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
+
+              console.log(rpcResponse);
+              this.setState((prevState) => ({
+                jobResult: rpcResponse,
+              }));
+
+              this.nextJobStep();
+
+            }).catch(rpcError => {
+              console.log(rpcError);
+            });
+          }
 
         });
       }).catch(this.handleReject);

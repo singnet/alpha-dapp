@@ -1,0 +1,38 @@
+{
+  "nested": {
+    "ExampleService": {
+      "methods": {
+        "classify": {
+          "requestType": "ClassifyRequest",
+          "responseType": "ClassifyResponse"
+        }
+      }
+    },
+    "ClassifyRequest": {
+      "fields": {
+        "imageType": {
+          "type": "string",
+          "id": 1
+        },
+        "image": {
+          "type": "string",
+          "id": 2
+        }
+      }
+    },
+    "ClassifyResponse": {
+      "fields": {
+        "predictions": {
+          "rule": "repeated",
+          "type": "string",
+          "id": 1
+        },
+        "confidences": {
+          "rule": "repeated",
+          "type": "float",
+          "id": 2
+        }
+      }
+    }
+  }
+}

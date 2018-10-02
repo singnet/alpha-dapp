@@ -1,0 +1,7 @@
+#!/bin/bash
+echo "Input: Enter name of .proto (eg. resources/example.proto)"
+read proto
+echo "Output: Enter name of .json (eg. artifacts/example.json)"
+read json
+
+node_modules/.bin/pbjs -t json $proto > $json

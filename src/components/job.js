@@ -18,6 +18,10 @@ class Job extends React.Component {
 
   constructor(props) {
     super(props);
+    //Protobuf descriptor
+    const { jsonDescriptor, agent }  = props;
+    this.protobufClient = new ProtoBuf({ jsonDescriptor, endpoint:agent.endpoint });
+    this.protobufClient.generateStubs();
 
     this.state = {
       jobAddress:             undefined,
@@ -173,16 +177,8 @@ class Job extends React.Component {
             
           
           if (grpc) {
-            //TODO Fetch from ipfs endpoint the json
-            //NOTICE this is to fewtch from local filesystem 
-            const jsonDescriptor  = require("../example.json");
-            const endpoint        = this.props.agent.endpoint;
-            const ProtoBufClient  = new ProtoBuf({ jsonDescriptor, endpoint, config: callHeaders });
-            ProtoBufClient.generateStubs();
-
-            const serviceName     = ProtoBufClient.findServiceByMethod(methodName); 
-            const currentService  = ProtoBufClient.services[serviceName];
-            const currentMethod   = currentService.methods[methodName];
+            const ProtoBufClient = this.protobufClient;
+            const currentMethod  = ProtoBufClient.services[ProtoBufClient.findServiceByMethod(methodName)].methods[methodName];
 
             return currentMethod.call(params).then(grpcResponse => {
               console.log(grpcResponse);
@@ -390,7 +386,7 @@ class Job extends React.Component {
             <React.Fragment>
             <div>
             <Divider orientation="left">Service Call</Divider>
-            <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
+            <CallComponent protobufClient={this.protobufClient} callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
             </div>
             </React.Fragment>
           }

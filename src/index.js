@@ -22,6 +22,7 @@ import FaceAlignmentService from './components/service/face_alignment';
 import FaceRecognitionService from './components/service/face_recognition';
 import ExchangeService from './components/service/exchange';
 
+import jsonDescriptor from "./example.json";
 
 class App extends React.Component {
 
@@ -168,7 +169,7 @@ class App extends React.Component {
                 }
                 {
                   this.state.selectedAgent && this.state.chainId && this.state.account &&
-                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
+                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} jsonDescriptor={jsonDescriptor}/>
                 }
               </Col>
             </Row>

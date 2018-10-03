@@ -47,23 +47,15 @@ export default class ProtoBuf {
       const currentClass = CurrentClass.create(this.rpcImpl, false, false);
 
       Object.entries(service.methods)
-        .forEach(([methodName, {requestType, responseType}]) => {
+        .forEach(([methodName, { requestType, responseType }]) => {
+          const RequestType   = this.root.lookupType(requestType);
+          const ResponseType   = this.root.lookupType(responseType);
           const call = (params) => currentClass[methodName](params);
-          Object.assign(this.services, { [service.name]: { methods: { [methodName]: {call, requestType, responseType} } } });
+          Object.assign(this.services, { [service.name]: { methods: { [methodName]: { call, RequestType, ResponseType } } } });
         });
     });
   }
 
-  generateMessages(service) {
-    traverseTypes(this.root, type => {
-      const CurrentType   = this.root.lookupType(type.name);
-      
-      Object.entries(CurrentType.fields)
-        .forEach(([fieldName, fieldValue]) => {
-          console.log(CurrentType)
-        });
-    })
-  }
   /**
  * NOTICE: Fake server response
  * TODO: Remove it before merge

@@ -44,7 +44,7 @@ class AlphaExampleService extends React.Component {
     this.props.callApiCallback(this.state.methodName, {
         image: this.state.fileReader.result.split(',')[1],
         image_type: this.state.file.type.split('/')[1],
-    }, true);
+    });
   }
 
   componentWillReceiveProps(nextProps) {

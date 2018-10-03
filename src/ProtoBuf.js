@@ -18,9 +18,45 @@ export default class ProtoBuf {
     this.services = {};
 
     this.rpcImpl              = this.rpcImpl.bind(this);
+    this.mockValue            = this.mockValue.bind(this);
     this.generateStubs        = this.generateStubs.bind(this)
     this.isValidMessage       = this.isValidMessage.bind(this);
     this.findServiceByMethod  = this.findServiceByMethod.bind(this);
+    this.getFieldsFromMessage = this.getFieldsFromMessage.bind(this);
+  }
+
+  mockValue(type, rule) {
+    let defaultValue = "";
+
+    if (rule === "repeated") {
+      //TODO handle array types
+      //It's an array of type
+      return [];
+    }
+
+    switch (type) {
+      case "string":
+        return new String();
+      case "bool":
+        return new Boolean();
+      case "float":
+        return new Number();
+      case "double":
+        return new Number();
+      case "bytes":
+        return new Uint8Array();
+      default:
+        return "";
+    }
+  }
+
+  getFieldsFromMessage(message) {
+    let fields = {};
+      Object.entries(message.fields).forEach(([fieldKey, fieldValue]) => {
+        fieldValue = this.mockValue(fieldValue.type, fieldValue.rule);
+        Object.assign(fields, {[fieldKey] : fieldValue});
+      });
+    return fields;
   }
 
   findServiceByMethod(methodName) {
@@ -80,13 +116,14 @@ export default class ProtoBuf {
         throw Error("RequestType not verified")
 
       if (status === Code.OK) {
-        //Check request message
+        //Check response message
         if (!this.isValidMessage(ResponseType, res))
-          throw Error("Response not verified")
-        callback(null, res);
-      }
-      else 
-        throw res
+          throw Error("Response not verified");
+
+        callback(null, res.body);
+      } else {
+        throw res;
+      } 
 
     }).catch(err => callback(err, null))
   }

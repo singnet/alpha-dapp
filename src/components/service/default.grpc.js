@@ -27,13 +27,11 @@ class DefaultService extends React.Component {
 
   componentDidMount() {
 
-    const { services, getFieldsFromMessage } = this.props.protobufClient;
-    const methodNames = Object.keys(services[Object.keys(services)[0]].methods);
+    const { services } = this.props.protobufClient;
+    const methods = Object.keys(services[Object.keys(services)[0]].methods);
 
     this.setState({ 
-      methods: methodNames, 
-      fieldsRequest,
-      fieldResponse,
+      methods, 
       isLoading: false
     });
   }
@@ -64,7 +62,8 @@ class DefaultService extends React.Component {
   }
 
   handleSelectChange(value) {
-    const { methods, fieldsRequest } = this.state
+    const { methods } = this.state
+    const { services, getFieldsFromMessage } = this.props.protobufClient;
 
     if (value && value.length > 0 && methods.includes(value)) {
 

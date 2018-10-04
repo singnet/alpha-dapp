@@ -6,6 +6,8 @@ const defaultHeaders = {};
 /**
  * @class Protobuf
  * @param jsonDescriptor
+ * @param endpoint
+ * @param config 
  */
 export default class ProtoBuf {
   constructor({jsonDescriptor, endpoint, config}) {
@@ -93,8 +95,6 @@ export default class ProtoBuf {
   }
 
   /**
- * NOTICE: Fake server response
- * TODO: Remove it before merge
  * @param {*} method 
  * @param {*} requestData 
  * @param {*} callback 

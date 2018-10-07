@@ -1,25 +1,16 @@
 import protobuf from "protobufjs";
-import { Code } from "./util";
-
-const defaultHeaders = {};
 
 /**
  * @class Protobuf
  * @param jsonDescriptor
- * @param endpoint
- * @param config 
  */
 export default class ProtoBuf {
-  constructor({jsonDescriptor, endpoint, config}) {
+  constructor({ jsonDescriptor }) {
     this.json     = jsonDescriptor;
     this.root     = protobuf.Root.fromJSON(jsonDescriptor);
 
-    this.endpoint = endpoint;
-
-    this.config   = Object.assign({}, defaultHeaders, config);
     this.services = {};
 
-    this.rpcImpl              = this.rpcImpl.bind(this);
     this.mockValue            = this.mockValue.bind(this);
     this.generateStubs        = this.generateStubs.bind(this)
     this.isValidMessage       = this.isValidMessage.bind(this);
@@ -79,10 +70,11 @@ export default class ProtoBuf {
       return true;
   }
 
-  generateStubs() {
+  generateStubs(rpcCallMethod) {
+    rpcCallMethod = rpcCallMethod || (() => undefined)
     traverseServices(this.root, service => {
       const CurrentClass = this.root.lookup(service.name);
-      const currentClass = CurrentClass.create(this.rpcImpl, false, false);
+      const currentClass = CurrentClass.create(rpcCallMethod, false, false);
 
       Object.entries(service.methods)
         .forEach(([methodName, { requestType, responseType }]) => {
@@ -92,40 +84,6 @@ export default class ProtoBuf {
           Object.assign(this.services, { [service.name]: { methods: { [methodName]: { call, RequestType, ResponseType } } } });
         });
     });
-  }
-
-  /**
- * @param {*} method 
- * @param {*} requestData 
- * @param {*} callback 
- */
-  rpcImpl(method, requestData, callback) {
-    const RequestType   = this.root.lookupType(method.requestType);
-    const ResponseType  = this.root.lookupType(method.responseType);
-    //Check request message
-    if (!this.isValidMessage(RequestType,requestData))
-      throw Error("Request not verified")
-    // perform the request using an HTTP request or a WebSocket for example
-    fetch(this.endpoint, {
-      method: "POST",
-      headers: this.config,
-      body: requestData,
-    }).then((res) => {
-      const { status, bodyUsed } = res;
-      if (bodyUsed && ResponseType.verify(res.body))
-        throw Error("RequestType not verified")
-
-      if (status === Code.OK) {
-        //Check response message
-        if (!this.isValidMessage(ResponseType, res))
-          throw Error("Response not verified");
-
-        callback(null, res.body);
-      } else {
-        throw res;
-      } 
-
-    }).catch(err => callback(err, null))
   }
 }
 

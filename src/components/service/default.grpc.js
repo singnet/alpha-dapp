@@ -26,9 +26,10 @@ class DefaultService extends React.Component {
   }
 
   componentDidMount() {
+    const { protobuf } = this.props;
+    protobuf.generateStubs();
 
-    const { services } = this.props.protobufClient;
-    const methods = Object.keys(services[Object.keys(services)[0]].methods);
+    const methods = Object.keys(protobuf.services[Object.keys(protobuf.services)[0]].methods);
 
     this.setState({ 
       methods, 
@@ -63,7 +64,7 @@ class DefaultService extends React.Component {
 
   handleSelectChange(value) {
     const { methods } = this.state
-    const { services, getFieldsFromMessage } = this.props.protobufClient;
+    const { services, getFieldsFromMessage } = this.props.protobuf;
 
     if (value && value.length > 0 && methods.includes(value)) {
 

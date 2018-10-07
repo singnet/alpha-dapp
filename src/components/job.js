@@ -5,6 +5,7 @@ import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
+import {GrpcClient} from "../grpc";
 import abiDecoder from 'abi-decoder';
 import md5 from 'md5';
 import ProtoBuf from '../ProtoBuf';
@@ -19,9 +20,8 @@ class Job extends React.Component {
   constructor(props) {
     super(props);
     //Protobuf descriptor
-    const { jsonDescriptor, agent }  = props;
-    this.protobufClient = new ProtoBuf({ jsonDescriptor, endpoint:agent.endpoint });
-    this.protobufClient.generateStubs();
+    const { jsonDescriptor }  = props;
+    this.protobuf = new ProtoBuf({ jsonDescriptor });
 
     this.state = {
       jobAddress:             undefined,
@@ -177,8 +177,12 @@ class Job extends React.Component {
             
           
           if (grpc) {
-            const ProtoBufClient = this.protobufClient;
-            const currentMethod  = ProtoBufClient.services[ProtoBufClient.findServiceByMethod(methodName)].methods[methodName];
+            console.log(this.props.agent.endpoint);
+
+            const grpcClient = new GrpcClient({ endpoint: this.props.agent.endpoint, headers: callHeaders });
+            this.protobuf.generateStubs(grpcClient.request);
+
+            const currentMethod  = this.protobuf.services[this.protobuf.findServiceByMethod(methodName)].methods[methodName];
 
             return currentMethod.call(params).then(grpcResponse => {
               console.log(grpcResponse);
@@ -195,9 +199,10 @@ class Job extends React.Component {
             });
 
           } else {
+            console.log(params.image);
+            console.log(params.image_type);
             let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
             rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
-
               console.log(rpcResponse);
               this.setState((prevState) => ({
                 jobResult: rpcResponse,
@@ -386,7 +391,7 @@ class Job extends React.Component {
             <React.Fragment>
             <div>
             <Divider orientation="left">Service Call</Divider>
-            <CallComponent protobufClient={this.protobufClient} callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
+            <CallComponent protobuf={this.protobuf} callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
             </div>
             </React.Fragment>
           }

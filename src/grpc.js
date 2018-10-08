@@ -27,7 +27,7 @@ export class GrpcClient {
     fetch(this.endpoint + "/" + method.parent.name + "/" + method.name, {
       method: "POST",
       headers: this.headers,
-      body: new Buffer.from(requestData),
+      body: requestData,
     }).then((res) => {
       const { status, bodyUsed } = res;
       /* if (bodyUsed && ResponseType.verify(res.body))

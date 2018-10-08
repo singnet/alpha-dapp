@@ -177,8 +177,6 @@ class Job extends React.Component {
             
           
           if (grpc) {
-            console.log(this.props.agent.endpoint);
-
             const grpcClient = new GrpcClient({ endpoint: this.props.agent.endpoint, headers: callHeaders });
             this.protobuf.generateStubs(grpcClient.request);
 
@@ -199,8 +197,6 @@ class Job extends React.Component {
             });
 
           } else {
-            console.log(params.image);
-            console.log(params.image_type);
             let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
             rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
               console.log(rpcResponse);

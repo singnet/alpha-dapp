@@ -19,9 +19,6 @@ class Job extends React.Component {
 
   constructor(props) {
     super(props);
-    //Protobuf descriptor
-    const { jsonDescriptor }  = props;
-    this.protobuf = new ProtoBuf({ jsonDescriptor });
 
     this.state = {
       jobAddress:             undefined,
@@ -44,8 +41,34 @@ class Job extends React.Component {
     abiDecoder.addABI(jobAbi);
   }
 
-  componentDidMount() {
+
+  async getJsonDescriptor() {
+      const encoding      = await fetch(this.props.agent.endpoint + '/encoding');
+      
+      if (await encoding.text() === "json")
+        throw "This agent do not supports gRPC and Protocol Buffer definition. It will be deprecated!";
+
+      const response      = await fetch('http://protobufjs.singularitynet.io/' + this.props.agent.address);
+      const responseJson  = await response.json();
+
+      if (response.ok)
+        return responseJson;
+      else 
+        throw responseJson.error;
+  }
+
+
+  async componentDidMount() {
     this.jobDomNode.scrollIntoView();
+
+    try {
+      //Protobuf descriptor
+      const jsonDescriptor  = await this.getJsonDescriptor();
+      this.protobuf = new ProtoBuf({ jsonDescriptor });
+    } catch (e) {
+      console.error(e);
+      alert(e);
+    }
   }
 
   nextJobStep() {

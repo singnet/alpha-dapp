@@ -200,7 +200,7 @@ class Job extends React.Component {
             
           
           if (grpc) {
-            const grpcClient = new GrpcClient({ endpoint: this.props.agent.endpoint, headers: callHeaders });
+            const grpcClient = new GrpcClient({ endpoint: this.props.agent.endpoint, headers: callHeaders, root: this.protobuf.root });
             this.protobuf.generateStubs(grpcClient.request);
 
             const currentMethod  = this.protobuf.services[this.protobuf.findServiceByMethod(methodName)].methods[methodName];

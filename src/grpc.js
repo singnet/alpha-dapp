@@ -1,15 +1,19 @@
+import { request } from "https";
+
 const defaultHeaders = {
   "Content-Type": "application/grpc-web+proto",
+  "Access-Control-Allow-Origin": "*",
+  "x-grpc-web": "1"
 };
 
 
 export class GrpcClient {
-  constructor({ endpoint, headers }) {
+  constructor({ endpoint, headers, root }) {
     this.endpoint = endpoint;
+    this.root     = root;
+    this.headers  = Object.assign({}, defaultHeaders, headers);
 
-    this.headers = Object.assign({}, defaultHeaders, headers);
-
-    this.request = this.request.bind(this);
+    this.request  = this.request.bind(this);
   }
 
   /**
@@ -18,31 +22,34 @@ export class GrpcClient {
  * @param {*} callback 
  */
   request(method, requestData, callback) {
-    /* const RequestType = this.root.lookupType(method.requestType);
-    const ResponseType = this.root.lookupType(method.responseType);
-    //Check request message
-    if (!this.isValidMessage(RequestType, requestData))
-      throw Error("Request not verified") */
+    //const RequestType = this.root.lookupType(method.requestType);
+    //const ResponseType = this.root.lookupType(method.responseType);
+
     // perform the request using an HTTP request or a WebSocket for example
     fetch(this.endpoint + "/" + method.parent.name + "/" + method.name, {
       method: "POST",
       headers: this.headers,
-      body: requestData,
+
+      body: requestData
+     // body: JSON.stringify(RequestType.decode(requestData)),
     }).then((res) => {
       const { status, bodyUsed } = res;
-      /* if (bodyUsed && ResponseType.verify(res.body))
-        throw Error("RequestType not verified") */
-      if (httpStatusToCode(status) === Code.OK && bodyUsed) {
-       /*  //Check response message
-        if (!this.isValidMessage(ResponseType, res))
-          throw Error("Response not verified"); */
+
+      if (httpStatusToCode(status) === Code.OK && bodyUsed)
         callback(null, res);
-      } else {
+      else
         throw res;
-      }
 
     }).catch(err => callback(err, null))
   }
+}
+
+
+function frameRequest(bytes) {
+  const frame = new ArrayBuffer(bytes.byteLength + 5)
+  new DataView(frame, 1, 4).setUint32(0, bytes.length, false)
+  new Uint8Array(frame, 5).set(bytes)
+  return new Uint8Array(frame)
 }
 
 /**

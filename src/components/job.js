@@ -5,8 +5,10 @@ import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
 import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
+import {GrpcClient} from "../grpc";
 import abiDecoder from 'abi-decoder';
 import md5 from 'md5';
+import ProtoBuf from '../ProtoBuf';
 
 // Version 1 of the Agent contract expects the signed 20-byte job address and we've hardcoded the
 // checksum of the bytecode for this version below. Version 2 expects the signed 42-byte hex-encoded
@@ -39,8 +41,34 @@ class Job extends React.Component {
     abiDecoder.addABI(jobAbi);
   }
 
-  componentDidMount() {
+
+  async getJsonDescriptor() {
+      const encoding      = await fetch(this.props.agent.endpoint + '/encoding');
+      
+      if (await encoding.text() === "json")
+        throw "This agent do not supports gRPC and Protocol Buffer definition. It will be deprecated!";
+
+      const response      = await fetch('http://protobufjs.singularitynet.io/' + this.props.agent.address);
+      const responseJson  = await response.json();
+
+      if (response.ok)
+        return responseJson;
+      else 
+        throw responseJson.error;
+  }
+
+
+  async componentDidMount() {
     this.jobDomNode.scrollIntoView();
+
+    try {
+      //Protobuf descriptor
+      const jsonDescriptor  = await this.getJsonDescriptor();
+      this.protobuf = new ProtoBuf({ jsonDescriptor });
+    } catch (e) {
+      console.error(e);
+      alert(e);
+    }
   }
 
   nextJobStep() {
@@ -133,8 +161,7 @@ class Job extends React.Component {
     }).catch(this.handleReject);
   }
 
-  callApi(methodName, params) {
-
+  callApi(methodName, params, grpc) {
     let addressBytes = [];
     for(let i=2; i< this.state.jobAddress.length-1; i+=2) {
       addressBytes.push(parseInt(this.state.jobAddress.substr(i, 2), 16));
@@ -159,31 +186,53 @@ class Job extends React.Component {
         let s = `0x${signature.slice(66, 130)}`;
         let v = parseInt(signature.slice(130, 132), 16);
 
-        this.props.agent.contractInstance.validateJobInvocation(this.state.jobAddress, v, r, s, {from: this.props.account}).then(validateJob => {
+        return this.props.agent.contractInstance.validateJobInvocation(this.state.jobAddress, v, r, s, {from: this.props.account}).then(validateJob => {
           console.log('job invocation validation returned: ' + validateJob[0]);
 
-          let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
-
+          
           // If agent is using old bytecode, put auth in params object. Otherwise, put auth in headers as new daemon
           // must be in use to support new signature scheme
           let callHeaders = bcSum === oldSigAgentBytecodeChecksum ? {} : {"snet-job-address": this.state.jobAddress,
-            "snet-job-signature": signature};
-
+          "snet-job-signature": signature};
+          
           let addlParams = bcSum === oldSigAgentBytecodeChecksum ? {job_address: this.state.jobAddress,
             job_signature: signature} : {};
+            
+          
+          if (grpc) {
+            const grpcClient = new GrpcClient({ endpoint: this.props.agent.endpoint, headers: callHeaders, root: this.protobuf.root });
+            this.protobuf.generateStubs(grpcClient.request);
 
-          rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
+            const currentMethod  = this.protobuf.services[this.protobuf.findServiceByMethod(methodName)].methods[methodName];
 
-            console.log(rpcResponse);
-            this.setState((prevState) => ({
-              jobResult: rpcResponse,
-            }));
+            return currentMethod.call(params).then(grpcResponse => {
+              console.log(grpcResponse);
+              
+              this.setState((prevState) => ({
+                jobResult: grpcResponse,
+              }));
 
-            this.nextJobStep();
+              this.nextJobStep();
 
-          }).catch(rpcError => {
-            console.log(rpcError);
-          });
+            }).catch(grpcError => {
+              console.error(grpcError);
+              throw grpcError;
+            });
+
+          } else {
+            let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
+            rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
+              console.log(rpcResponse);
+              this.setState((prevState) => ({
+                jobResult: rpcResponse,
+              }));
+
+              this.nextJobStep();
+
+            }).catch(rpcError => {
+              console.log(rpcError);
+            });
+          }
 
         });
       }).catch(this.handleReject);
@@ -361,7 +410,7 @@ class Job extends React.Component {
             <React.Fragment>
             <div>
             <Divider orientation="left">Service Call</Divider>
-            <CallComponent callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
+            <CallComponent protobuf={this.protobuf} callModal={serviceModal}  showModalCallback={this.showModal} callApiCallback={this.callApi} jobResult={this.state.jobResult}/>
             </div>
             </React.Fragment>
           }

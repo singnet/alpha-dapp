@@ -106,8 +106,8 @@ export const isValidAddress = (address, coin, network) => {
     } catch (e) {
       return false
     }
-  } 
-  
+  }
+
   //TODO Add other future coins address validation here 
 
   return false

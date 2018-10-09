@@ -7,6 +7,7 @@
     "build": "webpack --config ./config/webpack.prod.js -p --progress --colors",
     "build-analyze": "webpack --config ./config/webpack.prod-analyze.js -p --progress --colors",
     "serve-dist": "node scripts/serveDist.js",
+    "build-proto": "sh scripts/build-proto-json",
     "deploy": "node scripts/deploy.js alpha.singularitynet.io us-east-1"
   },
   "repository": {
@@ -28,6 +29,7 @@
     "jquery": "^3.3.1",
     "lodash": "^4.17.5",
     "md5": "^2.2.1",
+    "protobufjs": "^6.8.8",
     "qrcode.react": "^0.8.0",
     "react": "^16.3.1",
     "react-bootstrap": "^0.32.1",

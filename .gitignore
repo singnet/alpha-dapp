@@ -4,3 +4,6 @@ build
 .idea
 dist/bundle.*
 dist/index.html
+.DS_Store
+*.proto
+*.pem

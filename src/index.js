@@ -14,14 +14,13 @@ import Services from './components/services';
 import Job from './components/job';
 import { NETWORKS, AGI } from './util';
 
-import DefaultService from './components/service/default';
+import DefaultService from './components/service/default.grpc';
 import AlphaExampleService from './components/service/alpha_example';
 import FaceDetectService from './components/service/face_detect';
 import FaceLandmarksService from './components/service/face_landmarks';
 import FaceAlignmentService from './components/service/face_alignment';
 import FaceRecognitionService from './components/service/face_recognition';
 import ExchangeService from './components/service/exchange';
-
 
 class App extends React.Component {
 
@@ -167,8 +166,8 @@ class App extends React.Component {
                   <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>
                 }
                 {
-                  this.state.selectedAgent && this.state.chainId && this.state.account &&
-                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
+                   this.state.selectedAgent && this.state.chainId && this.state.account &&
+                   <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
                 }
               </Col>
             </Row>

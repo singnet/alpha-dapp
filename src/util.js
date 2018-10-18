@@ -112,3 +112,5 @@ export const isValidAddress = (address, coin, network) => {
 
   return false
 }
+
+export function hasOwnDefinedProperty(object, property) { return object.hasOwnProperty(property) && typeof object[property] !== "undefined" }

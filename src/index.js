@@ -29,13 +29,15 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      account:        undefined,
-      ethBalance:     0,
-      agiBalance:     0,
-      chainId:        undefined,
-      selectedAgent:  undefined,
-      agentCallComponent: undefined,
-      usingDefaultCallComponent: false,
+      account:                    undefined,
+      ethBalance:                 0,
+      agiBalance:                 0,
+      chainId:                    undefined,
+      selectedAgent:              undefined,
+      serviceEncoding:            undefined,
+      serviceSpec:                undefined,
+      agentCallComponent:         undefined,
+      usingDefaultCallComponent:  false,
     };
 
     this.serviceNameToComponent = {
@@ -140,13 +142,23 @@ class App extends React.Component {
 
   hireAgent(agent) {
     console.log("Agent " + agent.name + " selected");
-    
-    this.setState({
-      selectedAgent: agent,
-      serviceCallComponent: this.serviceNameToComponent[agent.name] || this.serviceDefaultComponent,
-      usingDefaultCallComponent: !(agent.name in this.serviceNameToComponent),
-    });
+    Promise.all([
+      window.fetch(`${agent.endpoint}/encoding`),
+      window.fetch(`http://protobufjs.singularitynet.io/${agent.address}`)
+    ]) 
+      .then(([ encodingResponse, serviceSpecResponse ]) => Promise.all([ encodingResponse.text(), serviceSpecResponse.json() ]))
+      .then(([ serviceEncoding, serviceSpec ]) => {
+        this.setState({
+          selectedAgent: agent,
+          serviceSpec,
+          serviceEncoding: serviceEncoding.trim(),
+          serviceCallComponent: this.serviceNameToComponent[agent.name] || this.serviceDefaultComponent,
+          usingDefaultCallComponent: !(agent.name in this.serviceNameToComponent),
+        });
+      })
+      .catch(console.error) 
   }
+
 
   render() {
 
@@ -167,8 +179,8 @@ class App extends React.Component {
                   <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>
                 }
                 {
-                  this.state.selectedAgent && this.state.chainId && this.state.account &&
-                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
+                  this.state.selectedAgent && this.state.serviceEncoding && this.state.serviceSpec && this.state.chainId && this.state.account &&
+                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} serviceEncoding={this.state.serviceEncoding} serviceSpec={this.state.serviceSpec} setFetchHeaders={this.setFetchHeaders} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
                 }
               </Col>
             </Row>

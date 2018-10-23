@@ -23,6 +23,8 @@ export const NETWORKS = {
   },
 };
 
+export const SERVICE_SPEC_PROVIDER_URL = "http://protobufjs.singularitynet.io"
+
 export const AGENT_STATE = {
   "ENABLED": 0,
   "DISABLED": 1,

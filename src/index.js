@@ -12,7 +12,7 @@ import {Layout, Divider, Card, Icon, Spin, message, Alert, Row, Col} from 'antd'
 import Account from './components/account';
 import Services from './components/services';
 import Job from './components/job';
-import { NETWORKS, AGI } from './util';
+import { NETWORKS, AGI, SERVICE_SPEC_PROVIDER_URL } from './util';
 
 import DefaultService from './components/service/default';
 import AlphaExampleService from './components/service/alpha_example';
@@ -144,7 +144,7 @@ class App extends React.Component {
     console.log("Agent " + agent.name + " selected");
     Promise.all([
       window.fetch(`${agent.endpoint}/encoding`),
-      window.fetch(`http://protobufjs.singularitynet.io/${agent.address}`)
+      window.fetch(`${SERVICE_SPEC_PROVIDER_URL}/${agent.address}`)
     ]) 
       .then(([ encodingResponse, serviceSpecResponse ]) => Promise.all([ encodingResponse.text(), serviceSpecResponse.json() ]))
       .then(([ serviceEncoding, serviceSpec ]) => {

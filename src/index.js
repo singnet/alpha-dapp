@@ -129,7 +129,7 @@ class App extends React.Component {
         this.setState({chainId: chainId});
 
         this.registryInstances = {};
-        if (chainId in AlphaRegistryNetworks) { this.registryInstances["AlphaRegistry"] = this.eth.contract(AlphaRegistryAbi).at(AlphaRegistryNetworks[chainId].address) };
+        // if (chainId in AlphaRegistryNetworks) { this.registryInstances["AlphaRegistry"] = this.eth.contract(AlphaRegistryAbi).at(AlphaRegistryNetworks[chainId].address) };
         if (chainId in RegistryNetworks) { this.registryInstances["Registry"] = this.eth.contract(RegistryAbi).at(RegistryNetworks[chainId].address) };
 
         this.tokenInstance = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;

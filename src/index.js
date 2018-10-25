@@ -71,8 +71,21 @@ class App extends React.Component {
     }
   }
 
-  handleWindowLoad() {
-    if(typeof window.web3 !== 'undefined') {
+  async handleWindowLoad() {
+    if(typeof window.ethereum !== 'undefined') {
+      try {
+        window.web3 = new Web3(ethereum);
+        await window.ethereum.enable();
+        this.initialize();
+      } catch (error) {
+          console.log("User denied access");
+      }
+    } else if(typeof window.web3 !== 'undefined') {
+      this.initialize();
+    }
+  }
+
+  initialize() {
       this.web3          = window.web3;
       this.eth           = new Eth(window.web3.currentProvider);
       window.ethjs       = this.eth;
@@ -80,7 +93,6 @@ class App extends React.Component {
 
       this.watchWalletTimer  = setInterval(() => this.watchWallet(), 500);
       this.watchNetworkTimer = setInterval(() => this.watchNetwork(), 500);
-    }
   }
 
   watchWallet() {

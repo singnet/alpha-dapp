@@ -12,7 +12,7 @@ import {Layout, Divider, Card, Icon, Spin, message, Alert, Row, Col} from 'antd'
 import Account from './components/account';
 import Services from './components/services';
 import Job from './components/job';
-import { NETWORKS, AGI } from './util';
+import { NETWORKS, AGI, ERROR_UTILS } from './util';
 
 import DefaultService from './components/service/default';
 import AlphaExampleService from './components/service/alpha_example';
@@ -78,7 +78,7 @@ class App extends React.Component {
         await window.ethereum.enable();
         this.initialize();
       } catch (error) {
-          console.log("User denied access");
+          console.log(ERROR_UTILS.sanitizeError(error));
       }
     } else if(typeof window.web3 !== 'undefined') {
       this.initialize();

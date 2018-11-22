@@ -12,7 +12,7 @@ import {Layout, Divider, Card, Icon, Spin, message, Alert, Row, Col} from 'antd'
 import Account from './components/account';
 import Services from './components/services';
 import Job from './components/job';
-import { NETWORKS, AGI, ERROR_UTILS } from './util';
+import { NETWORKS, AGI, SERVICE_SPEC_PROVIDER_URL,ERROR_UTILS } from './util';
 
 import DefaultService from './components/service/default';
 import AlphaExampleService from './components/service/alpha_example';
@@ -29,13 +29,15 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      account:        undefined,
-      ethBalance:     0,
-      agiBalance:     0,
-      chainId:        undefined,
-      selectedAgent:  undefined,
-      agentCallComponent: undefined,
-      usingDefaultCallComponent: false,
+      account:                    undefined,
+      ethBalance:                 0,
+      agiBalance:                 0,
+      chainId:                    undefined,
+      selectedAgent:              undefined,
+      serviceEncoding:            undefined,
+      serviceSpec:                undefined,
+      agentCallComponent:         undefined,
+      usingDefaultCallComponent:  false,
     };
 
     this.serviceNameToComponent = {
@@ -139,7 +141,7 @@ class App extends React.Component {
         this.setState({chainId: chainId});
 
         this.registryInstances = {};
-        if (chainId in AlphaRegistryNetworks) { this.registryInstances["AlphaRegistry"] = this.eth.contract(AlphaRegistryAbi).at(AlphaRegistryNetworks[chainId].address) };
+        // if (chainId in AlphaRegistryNetworks) { this.registryInstances["AlphaRegistry"] = this.eth.contract(AlphaRegistryAbi).at(AlphaRegistryNetworks[chainId].address) };
         if (chainId in RegistryNetworks) { this.registryInstances["Registry"] = this.eth.contract(RegistryAbi).at(RegistryNetworks[chainId].address) };
 
         this.tokenInstance = (chainId in tokenNetworks) ? this.eth.contract(tokenAbi).at(tokenNetworks[chainId].address) : undefined;
@@ -152,13 +154,23 @@ class App extends React.Component {
 
   hireAgent(agent) {
     console.log("Agent " + agent.name + " selected");
-    
-    this.setState({
-      selectedAgent: agent,
-      serviceCallComponent: this.serviceNameToComponent[agent.name] || this.serviceDefaultComponent,
-      usingDefaultCallComponent: !(agent.name in this.serviceNameToComponent),
-    });
+    Promise.all([
+      window.fetch(`${agent.endpoint}/encoding`),
+      window.fetch(`${SERVICE_SPEC_PROVIDER_URL}/${agent.address}`)
+    ]) 
+      .then(([ encodingResponse, serviceSpecResponse ]) => Promise.all([ encodingResponse.text(), serviceSpecResponse.json() ]))
+      .then(([ serviceEncoding, serviceSpec ]) => {
+        this.setState({
+          selectedAgent: agent,
+          serviceSpec,
+          serviceEncoding: serviceEncoding.trim(),
+          serviceCallComponent: this.serviceNameToComponent[agent.name] || this.serviceDefaultComponent,
+          usingDefaultCallComponent: !(agent.name in this.serviceNameToComponent),
+        });
+      })
+      .catch(console.error) 
   }
+
 
   render() {
 
@@ -179,8 +191,8 @@ class App extends React.Component {
                   <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>
                 }
                 {
-                  this.state.selectedAgent && this.state.chainId && this.state.account &&
-                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
+                  this.state.selectedAgent && this.state.serviceEncoding && this.state.serviceSpec && this.state.chainId && this.state.account &&
+                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} serviceEncoding={this.state.serviceEncoding} serviceSpec={this.state.serviceSpec} setFetchHeaders={this.setFetchHeaders} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
                 }
               </Col>
             </Row>

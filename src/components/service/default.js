@@ -13,6 +13,7 @@ class DefaultService extends React.Component {
     this.updateValid = debounce(this.updateValid, 500);
     
     this.state = {
+        serviceName: "test",
         methodName: "test",
         paramString: "{}",
         inputValid: true
@@ -35,6 +36,9 @@ class DefaultService extends React.Component {
     } catch(e) {
         inputValid = false;
     }
+
+    if (this.state.serviceName.length == 0)
+        inputValid = false;
     
     if (this.state.methodName.length == 0)
         inputValid = false;
@@ -53,7 +57,9 @@ class DefaultService extends React.Component {
 
   submitAction() {
     this.props.showModalCallback(this.props.callModal);
-    this.props.callApiCallback(this.state.methodName, 
+    this.props.callApiCallback(
+      this.state.serviceName,
+      this.state.methodName, 
       JSON.parse(this.state.paramString)
     );
   }
@@ -62,6 +68,10 @@ class DefaultService extends React.Component {
     return(
         <React.Fragment>
         <div>
+        <label>
+          Service name:
+          <input type="text" value={this.state.serviceName} onChange={ this.handleChange.bind(this, 'serviceName') } />
+        </label>
         <label>
           Method name:
           <input type="text" value={this.state.methodName} onChange={ this.handleChange.bind(this, 'methodName') } />
@@ -80,7 +90,14 @@ class DefaultService extends React.Component {
   }
   
   renderComplete() {
-    let jsonResult = JSON.stringify(this.props.jobResult);
+    let jsonResult
+    try {
+      jsonResult = typeof this.props.jobResult === "string" ? JSON.parse(this.props.jobResult) : this.props.jobResult
+      jsonResult = JSON.stringify(jsonResult, null, 4)
+    } catch(e) {
+      console.error(e)
+      throw new Error(e.message)
+    }
     return(
       <div>
         <textarea style={{width:"100%"}} rows="4" readOnly value={jsonResult}/>

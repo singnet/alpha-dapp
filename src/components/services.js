@@ -11,6 +11,7 @@ class Services extends React.Component {
 
     this.state = {
       agents : [],
+      featured: [],
       selectedAgent: undefined,
     };
 
@@ -149,7 +150,15 @@ class Services extends React.Component {
 
         let promises = [];
         
-        promises.push(fetch('/featured.json').then(response => response.json()))
+        if (this.state.featured.length < 1) {
+          promises.push(fetch('/featured.json')
+            .then(response => response.json())
+            .then(response => {
+              this.setState({ "featured": response })
+              return Promise.resolve(response)
+            })
+          )
+        } else promises.push(Promise.resolve(this.state.featured))
 
         for(let agent in agents) {
           let agentInstance = this.props.agentContract.at(agents[agent].address);

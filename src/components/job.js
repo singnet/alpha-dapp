@@ -1,9 +1,13 @@
 import React from 'react';
+
+import { Root } from 'protobufjs';
+import { grpcRequest, grpcJSONRequest, rpcImpl } from '../grpc.js'
+
 import agentAbi from 'singularitynet-platform-contracts/abi/Agent.json';
 import jobAbi from 'singularitynet-platform-contracts/abi/Job.json';
 import Eth from 'ethjs';
 import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table, Collapse, Steps, Modal, Upload} from 'antd';
-import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI } from '../util';
+import { NETWORKS, ERROR_UTILS, AGENT_STATE, AGI, hasOwnDefinedProperty } from '../util';
 import {JsonRpcClient} from "../jsonrpc";
 import abiDecoder from 'abi-decoder';
 import md5 from 'md5';
@@ -70,7 +74,6 @@ class Job extends React.Component {
   }
 
   createJob() {
-
     this.props.agent['contractInstance'].createJob({from: this.props.account}).then(response => {
 
       this.setState({
@@ -133,7 +136,7 @@ class Job extends React.Component {
     }).catch(this.handleReject);
   }
 
-  callApi(methodName, params) {
+  callApi(serviceName, methodName, params) {
 
     let addressBytes = [];
     for(let i=2; i< this.state.jobAddress.length-1; i+=2) {
@@ -162,29 +165,36 @@ class Job extends React.Component {
         this.props.agent.contractInstance.validateJobInvocation(this.state.jobAddress, v, r, s, {from: this.props.account}).then(validateJob => {
           console.log('job invocation validation returned: ' + validateJob[0]);
 
-          let rpcClient = new JsonRpcClient({endpoint: this.props.agent.endpoint});
+          const requestHeaders = { "snet-job-address": this.state.jobAddress, "snet-job-signature": signature }
+          const requestObject = params
 
-          // If agent is using old bytecode, put auth in params object. Otherwise, put auth in headers as new daemon
-          // must be in use to support new signature scheme
-          let callHeaders = bcSum === oldSigAgentBytecodeChecksum ? {} : {"snet-job-address": this.state.jobAddress,
-            "snet-job-signature": signature};
+          const serviceSpecJSON = Root.fromJSON(this.props.serviceSpec[0])
+          const packageName = Object.keys(serviceSpecJSON.nested)
+            .find(key =>
+              typeof serviceSpecJSON.nested[key] === "object" &&
+              hasOwnDefinedProperty(serviceSpecJSON.nested[key], "nested")
+            )
+ 
+          if (this.props.serviceEncoding === "json") {
+            grpcJSONRequest(this.props.agent.endpoint, packageName, serviceName, methodName, requestHeaders, requestObject)
+              .then(response => {
+                this.setState(() => ({ "jobResult": response }))
+                this.nextJobStep()
+              })
+              .catch(console.error)
+          } else if (this.props.serviceEncoding === "proto") {
+            const Service = serviceSpecJSON.lookup(serviceName)
+            const serviceObject = Service.create(rpcImpl(this.props.agent.endpoint, packageName, serviceName, methodName, requestHeaders), false, false)
 
-          let addlParams = bcSum === oldSigAgentBytecodeChecksum ? {job_address: this.state.jobAddress,
-            job_signature: signature} : {};
-
-          rpcClient.request(methodName, Object.assign({}, params, addlParams), Object.assign({}, callHeaders)).then(rpcResponse => {
-
-            console.log(rpcResponse);
-            this.setState((prevState) => ({
-              jobResult: rpcResponse,
-            }));
-
-            this.nextJobStep();
-
-          }).catch(rpcError => {
-            console.log(rpcError);
-          });
-
+            grpcRequest(serviceObject, methodName, requestObject)
+              .then(response => {
+                this.setState(() => ({ "jobResult": response }))
+                this.nextJobStep()
+              })
+              .catch(console.error)
+          } else {
+            throw new Error(`Encoding "${this.props.serviceEncoding}" is not recognized`)
+          }
         });
       }).catch(this.handleReject);
     }).catch((error) => {
@@ -206,7 +216,6 @@ class Job extends React.Component {
   }
   
   render() {
-
     let modal = type => 
       <Modal title={null} footer={null} closable={false} visible={this.state.showModal}>
         <Steps size="small" current={this.state.waitingForMetaMask ? 0 : 1}>

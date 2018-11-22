@@ -61,6 +61,7 @@ export class FORMAT_UTILS {
 }
 
 const ERROR_MESSAGE = {
+  denied: "User denied permission to access ethereum account",
   reject: "User rejected transaction submission or message signing",
   failed: "Transaction mined, but not executed",
   internal: "Internal Server Error",
@@ -74,6 +75,10 @@ const RPC_ERROR_BOUNDS = {
 export class ERROR_UTILS {
 
   static sanitizeError(error) {
+    if (typeof error === 'string' && error.indexOf("provider access") != -1) {
+        return ERROR_MESSAGE.denied;
+    }
+    
     if (typeof error === 'object' && error.hasOwnProperty("value")) {
       // It checks for rejection on both cases of message or transaction
       if (error.value.message.indexOf("User denied") != -1) {
@@ -91,7 +96,7 @@ export class ERROR_UTILS {
       return `${ERROR_MESSAGE.failed} TxHash: ${error.transactionHash}`
     }
 
-    return ERROR_MESSAGE.unknown
+    return ERROR_MESSAGE.unknown + " [" + String(error) + "]"
   }
 
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import Eth from 'ethjs';
-import {Layout, Divider, Card, Icon, Spin, Alert, Row, Col, Button, Tag, message, Table} from 'antd';
+import {Input, Divider, Card, Icon, Button, Tag, Table} from 'antd';
 import {NETWORKS, AGENT_STATE, AGI, FORMAT_UTILS, STRINGS} from '../util';
 
 
@@ -11,7 +11,6 @@ class Services extends React.Component {
 
     this.state = {
       agents : [],
-      selectedAgent: undefined,
     };
 
     this.servicesTableKeys = [
@@ -19,6 +18,27 @@ class Services extends React.Component {
         title:      'Agent',
         dataIndex:  'name',
         width:      200,
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => this.renderFilterDropdown({ setSelectedKeys, selectedKeys, confirm, clearFilters }),
+        filterIcon: filtered => <Icon type="search" theme="outlined" style={{ color: filtered ? '#108ee9' : '#aaa' }} />,
+        onFilter: (value, record) => record.name.toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: (visible) => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus();
+            });
+          }
+        },
+        render: (text) => {
+          const { searchText } = this.state;
+          return searchText ? (
+            <span>
+              {text.split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i')).map((fragment, i) => (
+                fragment.toLowerCase() === searchText.toLowerCase()
+                  ? <span key={i} style={{color:'#20AAF8'}} className="highlight">{fragment}</span> : fragment // eslint-disable-line
+              ))}
+            </span>
+          ) : text;
+        },
       },
       {
         title:      'Contract Address',
@@ -46,8 +66,13 @@ class Services extends React.Component {
         title:      '',
         dataIndex:  'state',
         render:     (state, agent, index) =>
-          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'} disabled={ !(state == AGENT_STATE.ENABLED) || typeof this.props.account === 'undefined' || typeof this.state.selectedAgent !== 'undefined' } onClick={() => { this.setState({ selectedAgent: agent }); return this.props.onAgentClick(agent); }} >
-            { this.getAgentButtonText(state, agent) }
+          <Button type={state == AGENT_STATE.ENABLED ? 'primary' : 'danger'}
+                  onClick={() => { return this.props.onAgentClick(agent); }}
+                  disabled={ !(state == AGENT_STATE.ENABLED)
+                              || typeof this.props.account === 'undefined'
+                              || this.props.jobInProgress
+                              || this.isSelectedAgent(agent)}>
+            {this.getAgentButtonText(state, agent) }
           </Button>
         }
     ].map(column => Object.assign({}, { width: 150 }, column));
@@ -55,9 +80,16 @@ class Services extends React.Component {
     this.watchRegistriesTimer = undefined;
   }
 
+  isSelectedAgent(agent){
+    if (this.props.selectedAgent !== undefined) {
+      return this.props.selectedAgent.key === agent.key;
+    }
+    return false;
+  }
+
   getAgentButtonText(state, agent) {
     if (this.props.account) {
-      if (typeof this.state.selectedAgent === 'undefined' || this.state.selectedAgent.key !== agent.key) {
+      if (typeof this.props.selectedAgent === 'undefined' || this.props.selectedAgent.key !== agent.key) {
         return state == AGENT_STATE.ENABLED ? 'Create Job' : 'Agent Disabled';
       } else {
         return 'Selected';
@@ -195,6 +227,33 @@ class Services extends React.Component {
         });
       });
     }
+  }
+
+  handleSearch(selectedKeys, confirm) {
+    this.setState({ searchText: selectedKeys[0] })
+    return confirm()
+  }
+
+  handleReset(clearFilters){
+    this.setState({ searchText: '' });
+    return clearFilters()
+  }
+
+  renderFilterDropdown({ setSelectedKeys, selectedKeys, confirm, clearFilters }){
+    return (
+      <div className="custom-filter-dropdown" style ={{padding: '8px',  borderRadius: '6px',  background: '#fff',  boxShadow: '0 1px 6px rgba(0, 0, 0, .2)'}}>
+        <Input
+          style={{width: '130px', marginRight: '8px'}}
+          ref={ele => this.searchInput = ele}
+          placeholder="Search name"
+          value={selectedKeys[0]}
+          onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => this.handleSearch(selectedKeys, confirm)}
+        />
+        <Button type="primary" onClick={() => this.handleSearch(selectedKeys, confirm)}>Search</Button>
+        <Button onClick={() => this.handleReset(clearFilters)}>Reset</Button>
+      </div>
+    )
   }
 
   render() {

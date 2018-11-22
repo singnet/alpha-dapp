@@ -36,6 +36,7 @@ class App extends React.Component {
       selectedAgent:  undefined,
       agentCallComponent: undefined,
       usingDefaultCallComponent: false,
+      jobInProgress: false,
     };
 
     this.serviceNameToComponent = {
@@ -44,7 +45,7 @@ class App extends React.Component {
       'face_landmarks': FaceLandmarksService,
       'face_alignment': FaceAlignmentService,
       'face_recognition': FaceRecognitionService,
-      'Exchange AGI for BTC': ExchangeService
+      'Exchange AGI for BTC': ExchangeService,
     };
     this.serviceDefaultComponent = DefaultService;
     
@@ -160,6 +161,19 @@ class App extends React.Component {
     });
   }
 
+  updateJobInProgress(jobInProgress) {
+    if (jobInProgress){
+      console.log("There is a job in progress");
+      this.setState({jobInProgress: true,})
+    } else {
+      console.log("No job in progress");
+      this.setState({selectedAgent:  undefined,
+                    agentCallComponent: undefined,
+                    usingDefaultCallComponent: false,
+                    jobInProgress: false,})
+    }
+  }
+
   render() {
 
     return (
@@ -173,14 +187,14 @@ class App extends React.Component {
               <Col xs={24} sm={24} md={22} lg={15} xl={18} span={9}>
                 <Account network={this.state.chainId} account={this.state.account} ethBalance={this.state.ethBalance} agiBalance={this.state.agiBalance} />
                 <Divider/>
-                <Services account={this.state.account} network={this.state.chainId} registries={this.registryInstances} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} />
+                <Services account={this.state.account} network={this.state.chainId} registries={this.registryInstances} agentContract={this.agentContract} onAgentClick={(agent) => this.hireAgent(agent)} jobInProgress={this.state.jobInProgress} selectedAgent={this.state.selectedAgent} />
                 <Divider/>
                 { this.state.usingDefaultCallComponent &&
                   <Alert type="warning" message="This service is using the default interface" description="You will have to marshall the data into JSON-RPC yourself and ensure it matches the API of the service based on its documentation."/>
                 }
                 {
                   this.state.selectedAgent && this.state.chainId && this.state.account &&
-                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} />
+                  <Job network={this.state.chainId} account={this.state.account} agent={this.state.selectedAgent} callComponent={this.state.serviceCallComponent} token={this.tokenInstance} sendJobInProgress={(jobInProgress) => this.updateJobInProgress(jobInProgress)} />
                 }
               </Col>
             </Row>
